@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.hospital.workers.WorkerLogicSmokeTest
+-------------------------------------------------------------------------------
+Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.178 s -- in org.hospital.workers.WorkerLogicSmokeTest

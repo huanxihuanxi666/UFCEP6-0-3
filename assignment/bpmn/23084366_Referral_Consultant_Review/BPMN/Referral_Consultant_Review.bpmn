@@ -16,6 +16,7 @@
         <bpmn:flowNodeRef>T_RequestMissing</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Referral</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_ReceiveMissing</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ValidateReferral</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="L_Consultant" name="Consultant / Clinical Team">
         <bpmn:flowNodeRef>T_RejectReferral</bpmn:flowNodeRef>
@@ -27,6 +28,7 @@
         <bpmn:flowNodeRef>T_RedirectReferral</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>E_Redirected</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_ConsultReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ValidateReferral</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:userTask id="T_RecordReferral" name="Record Referral &#38; Supporting Documents">
@@ -41,7 +43,7 @@
       <bpmn:extensionElements>
         <zeebe:userTask />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_002</bpmn:incoming>
+      <bpmn:incoming>Flow_ReferralValidated</bpmn:incoming>
       <bpmn:incoming>Flow_006</bpmn:incoming>
       <bpmn:outgoing>Flow_003</bpmn:outgoing>
     </bpmn:userTask>
@@ -122,7 +124,8 @@
       <bpmn:outgoing>Flow_008</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_001" sourceRef="S_Referral" targetRef="T_RecordReferral" />
-    <bpmn:sequenceFlow id="Flow_002" sourceRef="T_RecordReferral" targetRef="T_CheckReferral" />
+    <bpmn:sequenceFlow id="Flow_002" sourceRef="T_RecordReferral" targetRef="T_ValidateReferral" />
+    <bpmn:sequenceFlow id="Flow_ReferralValidated" sourceRef="T_ValidateReferral" targetRef="T_CheckReferral" />
     <bpmn:sequenceFlow id="Flow_006" sourceRef="T_ReceiveMissing" targetRef="T_CheckReferral" />
     <bpmn:sequenceFlow id="Flow_003" sourceRef="T_CheckReferral" targetRef="G_InfoComplete" />
     <bpmn:sequenceFlow id="Flow_004" name="No" sourceRef="G_InfoComplete" targetRef="T_RequestMissing">
@@ -149,6 +152,13 @@
     <bpmn:sequenceFlow id="Flow_016" sourceRef="T_RequestMoreClinical" targetRef="T_ReceiveMissing" />
     <bpmn:sequenceFlow id="Flow_010" sourceRef="T_AcceptReferral" targetRef="E_Accepted" />
     <bpmn:sequenceFlow id="Flow_014" sourceRef="T_RedirectReferral" targetRef="E_Redirected" />
+    <bpmn:serviceTask id="T_ValidateReferral" name="Validate Referral Reference with External Intake Service">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="validate-referral-reference" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_002</bpmn:incoming>
+      <bpmn:outgoing>Flow_ReferralValidated</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_Referral">
     <bpmndi:BPMNPlane id="Plane_Referral" bpmnElement="Collab_Referral">
@@ -159,7 +169,7 @@
         <dc:Bounds x="190" y="480" width="1700" height="360" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_L_Secretary" bpmnElement="L_Secretary" isHorizontal="true">
-        <dc:Bounds x="190" y="310" width="1700" height="170" />
+        <dc:Bounds x="190" y="310" width="1700" height="240" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_RecordReferral" bpmnElement="T_RecordReferral">
         <dc:Bounds x="380" y="365" width="150" height="80" />
@@ -194,7 +204,7 @@
       <bpmndi:BPMNShape id="Shape_G_ReferralDecision" bpmnElement="G_ReferralDecision" isMarkerVisible="true">
         <dc:Bounds x="885" y="535" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="789.5" y="553" width="85" height="14" />
+          <dc:Bounds x="944.5" y="553" width="85" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_ReceiveMissing" bpmnElement="T_ReceiveMissing">
@@ -224,6 +234,9 @@
       <bpmndi:BPMNShape id="Shape_T_ConsultReview" bpmnElement="T_ConsultReview">
         <dc:Bounds x="635" y="700" width="150" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ValidateReferral" bpmnElement="T_ValidateReferral">
+        <dc:Bounds x="590" y="470" width="150" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Flow_001" bpmnElement="Flow_001">
         <di:waypoint x="306" y="405" />
         <di:waypoint x="380" y="405" />
@@ -231,8 +244,12 @@
       <bpmndi:BPMNEdge id="Edge_Flow_002" bpmnElement="Flow_002">
         <di:waypoint x="530" y="405" />
         <di:waypoint x="560" y="405" />
-        <di:waypoint x="560" y="405" />
-        <di:waypoint x="590" y="405" />
+        <di:waypoint x="560" y="510" />
+        <di:waypoint x="590" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_ReferralValidated" bpmnElement="Flow_ReferralValidated">
+        <di:waypoint x="665" y="470" />
+        <di:waypoint x="665" y="445" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_006" bpmnElement="Flow_006">
         <di:waypoint x="1420" y="350" />
@@ -241,8 +258,8 @@
         <di:waypoint x="665" y="365" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_003" bpmnElement="Flow_003">
-        <di:waypoint x="740" y="405" />
-        <di:waypoint x="825" y="405" />
+        <di:waypoint x="740" y="390" />
+        <di:waypoint x="810" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_004" bpmnElement="Flow_004">
         <di:waypoint x="860" y="390" />
@@ -256,7 +273,7 @@
         <di:waypoint x="835" y="710" />
         <di:waypoint x="785" y="710" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="841" y="553" width="18" height="14" />
+          <dc:Bounds x="801" y="613" width="18" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_011" bpmnElement="Flow_011">
@@ -289,20 +306,19 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1u1ekb2_di" bpmnElement="Flow_1u1ekb2">
-        <di:waypoint x="933" y="558" />
-        <di:waypoint x="1165" y="558" />
+        <di:waypoint x="915" y="540" />
+        <di:waypoint x="1165" y="532" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1033" y="533" width="34" height="14" />
+          <dc:Bounds x="1023" y="511" width="34" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_013" bpmnElement="Flow_013">
         <di:waypoint x="910" y="535" />
         <di:waypoint x="910" y="500" />
-        <di:waypoint x="1380" y="500" />
-        <di:waypoint x="1380" y="580" />
-        <di:waypoint x="1470" y="580" />
+        <di:waypoint x="1550" y="500" />
+        <di:waypoint x="1550" y="530" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="945" y="485" width="41" height="14" />
+          <dc:Bounds x="965" y="485" width="41" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_016" bpmnElement="Flow_016">

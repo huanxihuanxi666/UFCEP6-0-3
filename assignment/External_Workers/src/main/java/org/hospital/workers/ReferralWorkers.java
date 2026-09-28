@@ -2,25 +2,36 @@ package org.hospital.workers;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.worker.JobWorker;
-
 import java.util.List;
+import java.util.Map;
 
 /**
  * Corresponds to:
  * Referral_Consultant_Review/BPMN/Referral_Consultant_Review.bpmn
  *
- * This BPMN currently contains User Tasks, Gateways, Send/Receive Tasks and
- * Message Flows, but no BPMN Service Task with a Zeebe job type.
- *
- * Therefore there is intentionally NO external Job Worker subscription here.
- * The file is kept so every BPMN area has a matching Java source file and the
- * absence of a Referral worker is explicit rather than accidental.
+ * The intake service validates the recorded referral reference before the
+ * Medical Secretary checks supporting information.
  */
 public final class ReferralWorkers {
+
+    public static final String VALIDATE_REFERRAL_REFERENCE = "validate-referral-reference";
 
     private ReferralWorkers() {}
 
     public static void register(ZeebeClient client, List<JobWorker> workers) {
-        System.out.println("[INFO] Referral BPMN has no external Service Task job type; no worker registration required.");
+        workers.add(WorkerSupport.open(
+                client,
+                VALIDATE_REFERRAL_REFERENCE,
+                ReferralWorkers::validateReferralReference));
+    }
+
+    public static Map<String, Object> validateReferralReference(Map<String, Object> input) {
+        Map<String, Object> out = WorkerSupport.output();
+        boolean valid = WorkerSupport.bool(input.get("requestedReferralReferenceValid"), true);
+
+        out.put("referralReferenceValidated", valid);
+        out.put("referralValidationStatus", valid ? "VALID" : "REVIEW_REQUIRED");
+        out.put("referralValidationReference", WorkerSupport.shortId("REF"));
+        return out;
     }
 }

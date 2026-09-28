@@ -1,0 +1,5 @@
+# Created at 2026-09-28T22:01:18.791
+Boot Manifest-JAR contains absolute paths in classpath 'D:\Camunda-Workspace\models\assignment\External_Workers\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

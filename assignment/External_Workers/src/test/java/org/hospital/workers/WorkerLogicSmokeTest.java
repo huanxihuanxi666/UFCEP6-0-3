@@ -11,6 +11,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class WorkerLogicSmokeTest {
 
     @Test
+    void referralReferenceValidationReturnsAuditableResult() {
+        Map<String, Object> input = new HashMap<>();
+        input.put("requestedReferralReferenceValid", true);
+
+        Map<String, Object> out = ReferralWorkers.validateReferralReference(input);
+
+        assertEquals(true, out.get("referralReferenceValidated"));
+        assertEquals("VALID", out.get("referralValidationStatus"));
+        assertNotNull(out.get("referralValidationReference"));
+    }
+
+    @Test
     void appointmentSlotAvailableCreatesGatewayVariables() {
         Map<String, Object> input = new HashMap<>();
         input.put("requestedSlotAvailable", true);

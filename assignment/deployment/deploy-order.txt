@@ -1,0 +1,7 @@
+1. bpmn/**/Forms/*.form
+2. bpmn/23084366_Referral_Consultant_Review/BPMN/Referral_Consultant_Review.bpmn
+3. bpmn/23084364_Appointment_Patient_Communication/BPMN/Appointment_Patient_Communication.bpmn
+4. bpmn/23084368_Treatment_Chemotherapy/BPMN/Treatment_Chemotherapy.bpmn
+5. bpmn/23084362_Funding_Payment_Refund/BPMN/Funding_Payment_Refund.bpmn
+6. bpmn/24000813_Enquiry_ClinicLetter_Monitoring/BPMN/Enquiry_ClinicLetter_Monitoring.bpmn
+7. bpmn/Hospital_Master_Process.bpmn

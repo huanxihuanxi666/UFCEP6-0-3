@@ -32,6 +32,7 @@ public final class HospitalExternalWorkers {
             System.out.println("Workers are ready.");
             System.out.println("Registered worker count: " + workers.size());
             System.out.println("Expected job types:");
+            System.out.println(" - validate-referral-reference");
             System.out.println(" - search-appointment-slot");
             System.out.println(" - send-appointment-letter");
             System.out.println(" - check-treatment-resource");

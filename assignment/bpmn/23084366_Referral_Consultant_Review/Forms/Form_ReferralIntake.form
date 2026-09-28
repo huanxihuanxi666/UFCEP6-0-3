@@ -35,6 +35,14 @@
       "defaultValue": true
     },
     {
+      "label": "Simulated referral reference valid",
+      "description": "Input for the external intake validation worker",
+      "type": "checkbox",
+      "id": "Field_requestedReferralReferenceValid",
+      "key": "requestedReferralReferenceValid",
+      "defaultValue": true
+    },
+    {
       "label": "Urgent referral",
       "type": "checkbox",
       "id": "Field_urgentReferral",
