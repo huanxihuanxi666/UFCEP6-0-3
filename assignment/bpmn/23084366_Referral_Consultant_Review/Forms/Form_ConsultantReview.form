@@ -1,0 +1,76 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Referral decision",
+      "type": "select",
+      "id": "Field_referralDecision",
+      "key": "referralDecision",
+      "values": [
+        {
+          "label": "Accept",
+          "value": "ACCEPT"
+        },
+        {
+          "label": "Reject",
+          "value": "REJECT"
+        },
+        {
+          "label": "Request further information",
+          "value": "MORE_INFORMATION"
+        },
+        {
+          "label": "Redirect",
+          "value": "REDIRECT"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Decision reason",
+      "type": "textarea",
+      "id": "Field_referralDecisionReason",
+      "key": "referralDecisionReason",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Speciality",
+      "type": "textfield",
+      "id": "Field_speciality",
+      "key": "speciality",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Preferred timeframe",
+      "type": "textfield",
+      "id": "Field_preferredTimeframe",
+      "key": "preferredTimeframe",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_ConsultantReview",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "schemaVersion": 16
+}

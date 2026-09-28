@@ -1,0 +1,84 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Proposed treatment",
+      "type": "textfield",
+      "id": "Field_proposedTreatment",
+      "key": "proposedTreatment",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Required start date",
+      "type": "datetime",
+      "subtype": "date",
+      "id": "Field_requiredStartDate",
+      "key": "requiredStartDate",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Number of cycles",
+      "type": "textfield",
+      "id": "Field_numberOfCycles",
+      "key": "numberOfCycles",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Cycle frequency",
+      "type": "textfield",
+      "id": "Field_cycleFrequency",
+      "key": "cycleFrequency",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Request authorised and complete",
+      "type": "checkbox",
+      "id": "Field_treatmentAuthorised",
+      "key": "treatmentAuthorised",
+      "defaultValue": true
+    },
+    {
+      "label": "Simulated resource available",
+      "type": "checkbox",
+      "id": "Field_requestedTreatmentAvailable",
+      "key": "requestedTreatmentAvailable",
+      "defaultValue": true
+    },
+    {
+      "label": "Special resource requirements",
+      "type": "textarea",
+      "id": "Field_specialResources",
+      "key": "specialResources",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_TreatmentRequest",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "schemaVersion": 16
+}

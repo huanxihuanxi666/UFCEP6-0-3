@@ -1,0 +1,61 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_monitoringPatientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Letter completed since the last review",
+      "type": "checkbox",
+      "id": "Field_clinicLetterCompleted",
+      "key": "clinicLetterCompleted",
+      "defaultValue": false
+    },
+    {
+      "label": "Current outstanding duration",
+      "values": [
+        {
+          "label": "7 days to 1 month",
+          "value": "7D_TO_1M"
+        },
+        {
+          "label": "Over 1 month",
+          "value": "OVER_1M"
+        },
+        {
+          "label": "Over 3 months",
+          "value": "OVER_3M"
+        }
+      ],
+      "type": "select",
+      "id": "Field_letterAgeBand",
+      "key": "letterAgeBand",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Delay reason or reminder outcome",
+      "type": "textarea",
+      "id": "Field_delayReason",
+      "key": "clinicLetterDelayReason",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_ClinicLetterMonitoring",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 18,
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "id": "Form_PatientContact",
+  "type": "default",
+  "components": [
+    {
+      "type": "select",
+      "key": "contactOutcome",
+      "label": "Telephone Outcome",
+      "values": [
+        {
+          "label": "Answered",
+          "value": "ANSWERED"
+        },
+        {
+          "label": "No Answer",
+          "value": "NO_ANSWER"
+        },
+        {
+          "label": "Wrong Number",
+          "value": "WRONG_NUMBER"
+        },
+        {
+          "label": "Reschedule",
+          "value": "RESCHEDULE"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "type": "textfield",
+      "key": "contactNote",
+      "label": "Contact Note",
+      "validate": {
+        "required": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Defs_Referral" targetNamespace="http://hospital.example/bpmn" exporter="Camunda Modeler" exporterVersion="5.51.0">
+  <bpmn:collaboration id="Collab_Referral">
+    <bpmn:participant id="P_Hospital" name="Hospital Patient Administration System" processRef="Process_Referral" />
+    <bpmn:participant id="P_Referrer" name="Referring Organisation" />
+    <bpmn:messageFlow id="M_Referral" name="Referral" sourceRef="P_Referrer" targetRef="S_Referral" />
+    <bpmn:messageFlow id="M_MissingReq" name="Missing Information Request" sourceRef="T_RequestMissing" targetRef="P_Referrer" />
+    <bpmn:messageFlow id="M_MissingInfo" name="Additional Information" sourceRef="P_Referrer" targetRef="T_ReceiveMissing" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Referral" name="Referral &#38; Consultant Review" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_Referral">
+      <bpmn:lane id="L_Secretary" name="Medical Secretary">
+        <bpmn:flowNodeRef>T_RecordReferral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_CheckReferral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_InfoComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RequestMissing</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Referral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ReceiveMissing</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L_Consultant" name="Consultant / Clinical Team">
+        <bpmn:flowNodeRef>T_RejectReferral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_ReferralDecision</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RequestMoreClinical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_AcceptReferral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Accepted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RedirectReferral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Redirected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ConsultReview</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:userTask id="T_RecordReferral" name="Record Referral &#38; Supporting Documents">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ReferralIntake" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_001</bpmn:incoming>
+      <bpmn:outgoing>Flow_002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_CheckReferral" name="Check Supporting Information">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_002</bpmn:incoming>
+      <bpmn:incoming>Flow_006</bpmn:incoming>
+      <bpmn:outgoing>Flow_003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="G_InfoComplete" name="Supporting Information Complete?">
+      <bpmn:incoming>Flow_003</bpmn:incoming>
+      <bpmn:outgoing>Flow_004</bpmn:outgoing>
+      <bpmn:outgoing>Flow_007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_RejectReferral" name="Record Rejection Reason">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_011</bpmn:incoming>
+      <bpmn:outgoing>Flow_012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="E_Rejected" name="Referral Rejected">
+      <bpmn:incoming>Flow_012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="T_RequestMissing" name="Request Missing Information">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_004</bpmn:incoming>
+      <bpmn:outgoing>Flow_005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:startEvent id="S_Referral" name="Referral Received">
+      <bpmn:outgoing>Flow_001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="G_ReferralDecision" name="Referral Decision">
+      <bpmn:incoming>Flow_008</bpmn:incoming>
+      <bpmn:outgoing>Flow_011</bpmn:outgoing>
+      <bpmn:outgoing>Flow_015</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1u1ekb2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_013</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_ReceiveMissing" name="Receive Missing Information">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ReferralIntake" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_016</bpmn:incoming>
+      <bpmn:incoming>Flow_005</bpmn:incoming>
+      <bpmn:outgoing>Flow_006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_RequestMoreClinical" name="Request Further Clinical Information">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_015</bpmn:incoming>
+      <bpmn:outgoing>Flow_016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_AcceptReferral" name="Record Acceptance + Booking Requirements">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1u1ekb2</bpmn:incoming>
+      <bpmn:outgoing>Flow_010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="E_Accepted" name="Accepted Referral Handover">
+      <bpmn:incoming>Flow_010</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="T_RedirectReferral" name="Record Redirect &#38; Target Service">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_013</bpmn:incoming>
+      <bpmn:outgoing>Flow_014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="E_Redirected" name="Referral Redirected">
+      <bpmn:incoming>Flow_014</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="T_ConsultReview" name="Perform Consultant Review">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ConsultantReview" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_007</bpmn:incoming>
+      <bpmn:outgoing>Flow_008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_001" sourceRef="S_Referral" targetRef="T_RecordReferral" />
+    <bpmn:sequenceFlow id="Flow_002" sourceRef="T_RecordReferral" targetRef="T_CheckReferral" />
+    <bpmn:sequenceFlow id="Flow_006" sourceRef="T_ReceiveMissing" targetRef="T_CheckReferral" />
+    <bpmn:sequenceFlow id="Flow_003" sourceRef="T_CheckReferral" targetRef="G_InfoComplete" />
+    <bpmn:sequenceFlow id="Flow_004" name="No" sourceRef="G_InfoComplete" targetRef="T_RequestMissing">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(informationComplete, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_007" name="Yes" sourceRef="G_InfoComplete" targetRef="T_ConsultReview">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(informationComplete, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_011" name="Reject" sourceRef="G_ReferralDecision" targetRef="T_RejectReferral">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(referralDecision, "") = "REJECT"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_012" sourceRef="T_RejectReferral" targetRef="E_Rejected" />
+    <bpmn:sequenceFlow id="Flow_005" sourceRef="T_RequestMissing" targetRef="T_ReceiveMissing" />
+    <bpmn:sequenceFlow id="Flow_008" sourceRef="T_ConsultReview" targetRef="G_ReferralDecision" />
+    <bpmn:sequenceFlow id="Flow_015" name="More information" sourceRef="G_ReferralDecision" targetRef="T_RequestMoreClinical">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(referralDecision, "") = "MORE_INFORMATION"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1u1ekb2" name="Accept" sourceRef="G_ReferralDecision" targetRef="T_AcceptReferral">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(referralDecision, "") = "ACCEPT"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_013" name="Redirect" sourceRef="G_ReferralDecision" targetRef="T_RedirectReferral">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(referralDecision, "") = "REDIRECT"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_016" sourceRef="T_RequestMoreClinical" targetRef="T_ReceiveMissing" />
+    <bpmn:sequenceFlow id="Flow_010" sourceRef="T_AcceptReferral" targetRef="E_Accepted" />
+    <bpmn:sequenceFlow id="Flow_014" sourceRef="T_RedirectReferral" targetRef="E_Redirected" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_Referral">
+    <bpmndi:BPMNPlane id="Plane_Referral" bpmnElement="Collab_Referral">
+      <bpmndi:BPMNShape id="Shape_P_Hospital" bpmnElement="P_Hospital" isHorizontal="true">
+        <dc:Bounds x="160" y="310" width="1730" height="530" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Consultant" bpmnElement="L_Consultant" isHorizontal="true">
+        <dc:Bounds x="190" y="480" width="1700" height="360" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Secretary" bpmnElement="L_Secretary" isHorizontal="true">
+        <dc:Bounds x="190" y="310" width="1700" height="170" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RecordReferral" bpmnElement="T_RecordReferral">
+        <dc:Bounds x="380" y="365" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_CheckReferral" bpmnElement="T_CheckReferral">
+        <dc:Bounds x="590" y="365" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_InfoComplete" bpmnElement="G_InfoComplete" isMarkerVisible="true">
+        <dc:Bounds x="810" y="365" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="807" y="315" width="56" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RejectReferral" bpmnElement="T_RejectReferral">
+        <dc:Bounds x="1035" y="750" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Rejected" bpmnElement="E_Rejected">
+        <dc:Bounds x="1662" y="772" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1637" y="808" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RequestMissing" bpmnElement="T_RequestMissing">
+        <dc:Bounds x="940" y="340" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Referral" bpmnElement="S_Referral">
+        <dc:Bounds x="270" y="387" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="244" y="423" width="89" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_ReferralDecision" bpmnElement="G_ReferralDecision" isMarkerVisible="true">
+        <dc:Bounds x="885" y="535" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="789.5" y="553" width="85" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ReceiveMissing" bpmnElement="T_ReceiveMissing">
+        <dc:Bounds x="1345" y="350" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RequestMoreClinical" bpmnElement="T_RequestMoreClinical">
+        <dc:Bounds x="1035" y="640" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_AcceptReferral" bpmnElement="T_AcceptReferral">
+        <dc:Bounds x="1165" y="520" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Accepted" bpmnElement="E_Accepted">
+        <dc:Bounds x="1232" y="642" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1265" y="621" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RedirectReferral" bpmnElement="T_RedirectReferral">
+        <dc:Bounds x="1475" y="530" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Redirected" bpmnElement="E_Redirected">
+        <dc:Bounds x="1702" y="552" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1693" y="588" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ConsultReview" bpmnElement="T_ConsultReview">
+        <dc:Bounds x="635" y="700" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_001" bpmnElement="Flow_001">
+        <di:waypoint x="306" y="405" />
+        <di:waypoint x="380" y="405" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_002" bpmnElement="Flow_002">
+        <di:waypoint x="530" y="405" />
+        <di:waypoint x="560" y="405" />
+        <di:waypoint x="560" y="405" />
+        <di:waypoint x="590" y="405" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_006" bpmnElement="Flow_006">
+        <di:waypoint x="1420" y="350" />
+        <di:waypoint x="1420" y="285" />
+        <di:waypoint x="665" y="285" />
+        <di:waypoint x="665" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_003" bpmnElement="Flow_003">
+        <di:waypoint x="740" y="405" />
+        <di:waypoint x="825" y="405" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_004" bpmnElement="Flow_004">
+        <di:waypoint x="860" y="390" />
+        <di:waypoint x="940" y="390" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="884" y="395" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_007" bpmnElement="Flow_007">
+        <di:waypoint x="835" y="415" />
+        <di:waypoint x="835" y="710" />
+        <di:waypoint x="785" y="710" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="841" y="553" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_011" bpmnElement="Flow_011">
+        <di:waypoint x="925" y="570" />
+        <di:waypoint x="925" y="790" />
+        <di:waypoint x="1035" y="790" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="934" y="662" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_012" bpmnElement="Flow_012">
+        <di:waypoint x="1185" y="800" />
+        <di:waypoint x="1665" y="800" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_005" bpmnElement="Flow_005">
+        <di:waypoint x="1090" y="390" />
+        <di:waypoint x="1345" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_008" bpmnElement="Flow_008">
+        <di:waypoint x="785" y="760" />
+        <di:waypoint x="910" y="760" />
+        <di:waypoint x="910" y="585" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_015" bpmnElement="Flow_015">
+        <di:waypoint x="925" y="570" />
+        <di:waypoint x="1110" y="570" />
+        <di:waypoint x="1110" y="640" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1062" y="545" width="83" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1u1ekb2_di" bpmnElement="Flow_1u1ekb2">
+        <di:waypoint x="933" y="558" />
+        <di:waypoint x="1165" y="558" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1033" y="533" width="34" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_013" bpmnElement="Flow_013">
+        <di:waypoint x="910" y="535" />
+        <di:waypoint x="910" y="500" />
+        <di:waypoint x="1380" y="500" />
+        <di:waypoint x="1380" y="580" />
+        <di:waypoint x="1470" y="580" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="945" y="485" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_016" bpmnElement="Flow_016">
+        <di:waypoint x="1185" y="700" />
+        <di:waypoint x="1800" y="700" />
+        <di:waypoint x="1800" y="390" />
+        <di:waypoint x="1495" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_010" bpmnElement="Flow_010">
+        <di:waypoint x="1250" y="600" />
+        <di:waypoint x="1250" y="642" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_014" bpmnElement="Flow_014">
+        <di:waypoint x="1625" y="570" />
+        <di:waypoint x="1702" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_P_Referrer" bpmnElement="P_Referrer" isHorizontal="true">
+        <dc:Bounds x="680" y="50" width="870" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_M_Referral" bpmnElement="M_Referral">
+        <di:waypoint x="680" y="90" />
+        <di:waypoint x="288" y="90" />
+        <di:waypoint x="288" y="387" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="285" y="232" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_MissingReq" bpmnElement="M_MissingReq">
+        <di:waypoint x="1015" y="340" />
+        <di:waypoint x="1015" y="130" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="982" y="215" width="56" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_MissingInfo" bpmnElement="M_MissingInfo">
+        <di:waypoint x="1460" y="130" />
+        <di:waypoint x="1460" y="350" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1452" y="259" width="56" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

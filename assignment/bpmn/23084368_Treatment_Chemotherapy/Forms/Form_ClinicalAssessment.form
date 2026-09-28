@@ -1,0 +1,47 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Patient consents to treatment",
+      "type": "checkbox",
+      "id": "Field_patientConsent",
+      "key": "patientConsent",
+      "defaultValue": true
+    },
+    {
+      "label": "Diagnosis / assessment summary",
+      "type": "textarea",
+      "id": "Field_clinicalAssessment",
+      "key": "clinicalAssessment",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Treatment options discussed",
+      "type": "textarea",
+      "id": "Field_treatmentOptions",
+      "key": "treatmentOptions",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_ClinicalAssessment",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "schemaVersion": 16
+}

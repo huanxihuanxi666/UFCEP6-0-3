@@ -1,0 +1,96 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_0jslhx8"
+      }
+    },
+    {
+      "label": "Speciality",
+      "type": "textfield",
+      "id": "Field_speciality",
+      "key": "speciality",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_0pu4llu"
+      }
+    },
+    {
+      "label": "Appointment priority",
+      "type": "textfield",
+      "id": "Field_appointmentPriority",
+      "key": "appointmentPriority",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_1w0464t"
+      }
+    },
+    {
+      "label": "Preferred timeframe",
+      "type": "textfield",
+      "id": "Field_preferredTimeframe",
+      "key": "preferredTimeframe",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_0r1m5tw"
+      }
+    },
+    {
+      "label": "Urgent referral (carried from accepted referral)",
+      "type": "checkbox",
+      "id": "Field_urgentReferral",
+      "key": "urgentReferral",
+      "layout": {
+        "row": "Row_0qhgtfw"
+      },
+      "defaultValue": false
+    },
+    {
+      "label": "Simulated slot available",
+      "type": "checkbox",
+      "id": "Field_requestedSlotAvailable",
+      "key": "requestedSlotAvailable",
+      "layout": {
+        "row": "Row_0r56rph"
+      },
+      "defaultValue": true
+    },
+    {
+      "subtype": "date",
+      "label": "Requested appointment date",
+      "type": "datetime",
+      "id": "Field_requestedAppointmentDate",
+      "key": "requestedAppointmentDate",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "validate": {
+        "required": false
+      },
+      "layout": {
+        "row": "Row_0tmhl09"
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_AppointmentBooking",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}

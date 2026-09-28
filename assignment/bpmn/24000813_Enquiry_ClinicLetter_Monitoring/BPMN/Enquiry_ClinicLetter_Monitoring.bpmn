@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Defs_EnquiryLetter" targetNamespace="http://hospital.example/bpmn" exporter="Camunda Modeler" exporterVersion="5.41.0">
+  <bpmn:collaboration id="Collab_EnquiryLetter">
+    <bpmn:participant id="P_Hospital" name="Hospital Patient Administration System" processRef="Process_EnquiryLetter" />
+    <bpmn:participant id="P_Correspondence" name="External Correspondence Service" />
+    <bpmn:participant id="P_Patient" name="Patient" />
+    <bpmn:messageFlow id="M_ClinicLetter" name="Clinic Letter" sourceRef="T_DistributeLetter" targetRef="P_Correspondence" />
+    <bpmn:messageFlow id="M_PatientEnquiry" name="Patient Enquiry" sourceRef="P_Patient" targetRef="S_Enquiry" />
+    <bpmn:messageFlow id="M_ClinicLetter_Result" name="Correspondence Delivery Result" sourceRef="P_Correspondence" targetRef="T_DistributeLetter" />
+  </bpmn:collaboration>
+  <bpmn:message id="Message_PatientEnquiry" name="Patient Enquiry" />
+  <bpmn:process id="Process_EnquiryLetter" name="Enquiry / Clinic Letter / Pathway Monitoring" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_EnquiryLetter">
+      <bpmn:lane id="L_Admin" name="Call Handling / Administrative Team">
+        <bpmn:flowNodeRef>T_RecordEnquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_FinEnquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_AdminEnquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Enquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Enquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Enquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_AdminLetter</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_DistributeLetter</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L_Clinical" name="CNS / Consultant / Clinical Team">
+        <bpmn:flowNodeRef>G_UrgentEnquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_UrgentClinical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Letter</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_PrepareLetter</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ClinicalEnquiry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ApproveLetter</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_LetterApproved</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L_Pathway" name="Pathway Coordination / Administrative Management">
+        <bpmn:flowNodeRef>G_Letter7</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_MonitorLetter</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EV_Weekly</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_LetterAge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Reminder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Manager</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Higher</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Pathway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_LetterDone</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:exclusiveGateway id="G_UrgentEnquiry" name="Urgent Clinical Concern?">
+      <bpmn:incoming>Flow_008</bpmn:incoming>
+      <bpmn:outgoing>Flow_009</bpmn:outgoing>
+      <bpmn:outgoing>Flow_011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_UrgentClinical" name="Highlight Immediately / Clinical Escalation">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_009</bpmn:incoming>
+      <bpmn:outgoing>Flow_010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:startEvent id="S_Letter" name="Treatment Complete / Clinic Letter Required">
+      <bpmn:outgoing>Flow_012</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="T_PrepareLetter" name="Prepare Clinic Letter">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ClinicLetter" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_012</bpmn:incoming>
+      <bpmn:outgoing>Flow_013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_RecordEnquiry" name="Record, Classify Priority &#38; Assign Team">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_Enquiry" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_001</bpmn:incoming>
+      <bpmn:outgoing>Flow_002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_FinEnquiry" name="Route Financial Enquiry to Finance">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_005</bpmn:incoming>
+      <bpmn:outgoing>Flow_006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_AdminEnquiry" name="Answer / Route Administrative Enquiry">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_003</bpmn:incoming>
+      <bpmn:outgoing>Flow_004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_ClinicalEnquiry" name="Route Clinical Enquiry to CNS / Authorised Clinician">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_007</bpmn:incoming>
+      <bpmn:outgoing>Flow_008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="E_Enquiry" name="Enquiry Resolved">
+      <bpmn:incoming>Flow_011</bpmn:incoming>
+      <bpmn:incoming>Flow_010</bpmn:incoming>
+      <bpmn:incoming>Flow_006</bpmn:incoming>
+      <bpmn:incoming>Flow_004</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="G_Letter7" name="Ready for Distribution Within 7 Days?">
+      <bpmn:incoming>Flow_NotApproved</bpmn:incoming>
+      <bpmn:incoming>Flow_013</bpmn:incoming>
+      <bpmn:outgoing>Flow_017</bpmn:outgoing>
+      <bpmn:outgoing>Flow_018</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_MonitorLetter" name="Add Delayed Letter to Pathway Monitoring">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ClinicLetterMonitoring" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_018</bpmn:incoming>
+      <bpmn:outgoing>Flow_019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="EV_Weekly" name="Weekly Reminder Timer">
+      <bpmn:incoming>Flow_019</bpmn:incoming>
+      <bpmn:incoming>Flow_028</bpmn:incoming>
+      <bpmn:outgoing>Flow_020</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="EV_Weekly_Timer">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="G_LetterAge" name="Outstanding Duration">
+      <bpmn:incoming>Flow_020</bpmn:incoming>
+      <bpmn:outgoing>Flow_023</bpmn:outgoing>
+      <bpmn:outgoing>Flow_021</bpmn:outgoing>
+      <bpmn:outgoing>Flow_022</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_Reminder" name="Send Weekly Reminder to Consultant">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ClinicLetterMonitoring" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_021</bpmn:incoming>
+      <bpmn:outgoing>Flow_024</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:startEvent id="S_Enquiry" name="Patient Enquiry Received">
+      <bpmn:outgoing>Flow_001</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_EnquiryStart" messageRef="Message_PatientEnquiry" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_008" sourceRef="T_ClinicalEnquiry" targetRef="G_UrgentEnquiry" />
+    <bpmn:sequenceFlow id="Flow_009" name="Urgent" sourceRef="G_UrgentEnquiry" targetRef="T_UrgentClinical">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(urgentClinicalConcern, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_011" name="Normal" sourceRef="G_UrgentEnquiry" targetRef="E_Enquiry">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(urgentClinicalConcern, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_010" sourceRef="T_UrgentClinical" targetRef="E_Enquiry" />
+    <bpmn:sequenceFlow id="Flow_012" sourceRef="S_Letter" targetRef="T_PrepareLetter" />
+    <bpmn:sequenceFlow id="Flow_013" sourceRef="T_PrepareLetter" targetRef="G_Letter7" />
+    <bpmn:sequenceFlow id="Flow_014" sourceRef="T_ApproveLetter" targetRef="G_LetterApproved" />
+    <bpmn:sequenceFlow id="Flow_Approved" name="Approved" sourceRef="G_LetterApproved" targetRef="T_AdminLetter">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(clinicLetterApproved, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_NotApproved" name="Not approved" sourceRef="G_LetterApproved" targetRef="G_Letter7">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(clinicLetterApproved, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_015" sourceRef="T_AdminLetter" targetRef="T_DistributeLetter" />
+    <bpmn:sequenceFlow id="Flow_016" sourceRef="T_DistributeLetter" targetRef="E_Pathway" />
+    <bpmn:sequenceFlow id="Flow_001" sourceRef="S_Enquiry" targetRef="T_RecordEnquiry" />
+    <bpmn:sequenceFlow id="Flow_002" sourceRef="T_RecordEnquiry" targetRef="G_Enquiry" />
+    <bpmn:sequenceFlow id="Flow_003" name="Administrative" sourceRef="G_Enquiry" targetRef="T_AdminEnquiry">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(enquiryType, "") = "ADMINISTRATIVE"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_005" name="Financial" sourceRef="G_Enquiry" targetRef="T_FinEnquiry">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(enquiryType, "") = "FINANCIAL"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_007" name="Clinical" sourceRef="G_Enquiry" targetRef="T_ClinicalEnquiry">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(enquiryType, "") = "CLINICAL"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_006" sourceRef="T_FinEnquiry" targetRef="E_Enquiry" />
+    <bpmn:sequenceFlow id="Flow_004" sourceRef="T_AdminEnquiry" targetRef="E_Enquiry" />
+    <bpmn:sequenceFlow id="Flow_017" name="Within 7 days / revise" sourceRef="G_Letter7" targetRef="T_ApproveLetter">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(clinicLetterWithin7Days, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_018" name="No" sourceRef="G_Letter7" targetRef="T_MonitorLetter">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(clinicLetterWithin7Days, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_027" name="Yes" sourceRef="G_LetterDone" targetRef="T_ApproveLetter">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(clinicLetterCompleted, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_019" sourceRef="T_MonitorLetter" targetRef="EV_Weekly" />
+    <bpmn:sequenceFlow id="Flow_028" name="No" sourceRef="G_LetterDone" targetRef="EV_Weekly">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(clinicLetterCompleted, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_020" sourceRef="EV_Weekly" targetRef="G_LetterAge" />
+    <bpmn:sequenceFlow id="Flow_023" name="&#62;3 months" sourceRef="G_LetterAge" targetRef="T_Higher">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(letterAgeBand, "") = "OVER_3M"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_026" sourceRef="T_Higher" targetRef="G_LetterDone" />
+    <bpmn:sequenceFlow id="Flow_024" sourceRef="T_Reminder" targetRef="G_LetterDone" />
+    <bpmn:sequenceFlow id="Flow_025" sourceRef="T_Manager" targetRef="G_LetterDone" />
+    <bpmn:sequenceFlow id="Flow_021" name="7d-1m" sourceRef="G_LetterAge" targetRef="T_Reminder">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(letterAgeBand, "") = "7D_TO_1M"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_022" name="&#62;1 month" sourceRef="G_LetterAge" targetRef="T_Manager">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(letterAgeBand, "") = "OVER_1M"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="G_Enquiry" name="Enquiry Type">
+      <bpmn:incoming>Flow_002</bpmn:incoming>
+      <bpmn:outgoing>Flow_003</bpmn:outgoing>
+      <bpmn:outgoing>Flow_005</bpmn:outgoing>
+      <bpmn:outgoing>Flow_007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_Manager" name="Escalate to Administrative Manager (&#62;1 month)">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ClinicLetterMonitoring" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_022</bpmn:incoming>
+      <bpmn:outgoing>Flow_025</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_Higher" name="Escalate to Higher Management (&#62;3 months)">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ClinicLetterMonitoring" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_023</bpmn:incoming>
+      <bpmn:outgoing>Flow_026</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_AdminLetter" name="Administrative Check + Confirm Recipients">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="T_DistributeLetter" name="Distribute Clinic Letter">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="send-clinic-letter" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_015</bpmn:incoming>
+      <bpmn:outgoing>Flow_016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="E_Pathway" name="Clinic Letter Complete / Pathway Closed">
+      <bpmn:incoming>Flow_016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="G_LetterDone" name="Clinic Letter Completed?">
+      <bpmn:incoming>Flow_026</bpmn:incoming>
+      <bpmn:incoming>Flow_024</bpmn:incoming>
+      <bpmn:incoming>Flow_025</bpmn:incoming>
+      <bpmn:outgoing>Flow_027</bpmn:outgoing>
+      <bpmn:outgoing>Flow_028</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_ApproveLetter" name="Approve Clinical Content">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_ClinicLetterApproval" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_027</bpmn:incoming>
+      <bpmn:incoming>Flow_017</bpmn:incoming>
+      <bpmn:outgoing>Flow_014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="G_LetterApproved" name="Clinical Content Approved?">
+      <bpmn:incoming>Flow_014</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_NotApproved</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_EnquiryLetter">
+    <bpmndi:BPMNPlane id="Plane_EnquiryLetter" bpmnElement="Collab_EnquiryLetter">
+      <bpmndi:BPMNShape id="Shape_P_Hospital" bpmnElement="P_Hospital" isHorizontal="true">
+        <dc:Bounds x="160" y="260" width="2280" height="1100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Pathway" bpmnElement="L_Pathway" isHorizontal="true">
+        <dc:Bounds x="190" y="820" width="2250" height="540" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Clinical" bpmnElement="L_Clinical" isHorizontal="true">
+        <dc:Bounds x="190" y="650" width="2250" height="170" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Admin" bpmnElement="L_Admin" isHorizontal="true">
+        <dc:Bounds x="190" y="260" width="2250" height="390" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_UrgentEnquiry" bpmnElement="G_UrgentEnquiry" isMarkerVisible="true">
+        <dc:Bounds x="980" y="705" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="969" y="667.5" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_UrgentClinical" bpmnElement="T_UrgentClinical">
+        <dc:Bounds x="1140" y="705" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Letter" bpmnElement="S_Letter">
+        <dc:Bounds x="1530" y="705" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1506" y="741" width="85" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_PrepareLetter" bpmnElement="T_PrepareLetter">
+        <dc:Bounds x="1650" y="705" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RecordEnquiry" bpmnElement="T_RecordEnquiry">
+        <dc:Bounds x="425" y="340" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_FinEnquiry" bpmnElement="T_FinEnquiry">
+        <dc:Bounds x="1095" y="360" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_AdminEnquiry" bpmnElement="T_AdminEnquiry">
+        <dc:Bounds x="860" y="460" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ClinicalEnquiry" bpmnElement="T_ClinicalEnquiry">
+        <dc:Bounds x="740" y="690" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Enquiry" bpmnElement="E_Enquiry">
+        <dc:Bounds x="1402" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1447.5" y="493" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Letter7" bpmnElement="G_Letter7" isMarkerVisible="true">
+        <dc:Bounds x="725" y="925" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="623" y="936" width="73" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_MonitorLetter" bpmnElement="T_MonitorLetter">
+        <dc:Bounds x="675" y="1030" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EV_Weekly" bpmnElement="EV_Weekly">
+        <dc:Bounds x="1122" y="1042" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1096" y="1088" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_LetterAge" bpmnElement="G_LetterAge" isMarkerVisible="true">
+        <dc:Bounds x="1655" y="1055" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1650" y="1017.5" width="60" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Reminder" bpmnElement="T_Reminder">
+        <dc:Bounds x="1175" y="1180" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Enquiry" bpmnElement="S_Enquiry">
+        <dc:Bounds x="272" y="362" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="252" y="407.5" width="75" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Enquiry" bpmnElement="G_Enquiry" isMarkerVisible="true">
+        <dc:Bounds x="675" y="345" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="667" y="321" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Manager" bpmnElement="T_Manager">
+        <dc:Bounds x="1595" y="1200" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Higher" bpmnElement="T_Higher">
+        <dc:Bounds x="1815" y="1040" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_AdminLetter" bpmnElement="T_AdminLetter">
+        <dc:Bounds x="1980" y="440" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_DistributeLetter" bpmnElement="T_DistributeLetter">
+        <dc:Bounds x="2235" y="440" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Pathway" bpmnElement="E_Pathway">
+        <dc:Bounds x="2292" y="862" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2270" y="898" width="80" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_LetterDone" bpmnElement="G_LetterDone" isMarkerVisible="true">
+        <dc:Bounds x="2065" y="1055" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2125" y="1066" width="60" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ApproveLetter" bpmnElement="T_ApproveLetter">
+        <dc:Bounds x="2035" y="705" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_LetterApproved" bpmnElement="G_LetterApproved" isMarkerVisible="true">
+        <dc:Bounds x="1815" y="720" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1841" y="690.5" width="78" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_008" bpmnElement="Flow_008">
+        <di:waypoint x="890" y="730" />
+        <di:waypoint x="980" y="730" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_009" bpmnElement="Flow_009">
+        <di:waypoint x="1015" y="745" />
+        <di:waypoint x="1140" y="745" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1032" y="728" width="34" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_011" bpmnElement="Flow_011">
+        <di:waypoint x="1005" y="755" />
+        <di:waypoint x="1005" y="800" />
+        <di:waypoint x="1420" y="800" />
+        <di:waypoint x="1420" y="518" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1362" y="780" width="36" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_010" bpmnElement="Flow_010">
+        <di:waypoint x="1215" y="705" />
+        <di:waypoint x="1215" y="590" />
+        <di:waypoint x="1404" y="507" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_012" bpmnElement="Flow_012">
+        <di:waypoint x="1566" y="723" />
+        <di:waypoint x="1650" y="723" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_013" bpmnElement="Flow_013">
+        <di:waypoint x="1725" y="785" />
+        <di:waypoint x="1725" y="850" />
+        <di:waypoint x="750" y="850" />
+        <di:waypoint x="750" y="925" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_014" bpmnElement="Flow_014">
+        <di:waypoint x="2035" y="745" />
+        <di:waypoint x="1865" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Approved" bpmnElement="Flow_Approved">
+        <di:waypoint x="1840" y="720" />
+        <di:waypoint x="1840" y="480" />
+        <di:waypoint x="1980" y="480" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1826" y="518" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_NotApproved" bpmnElement="Flow_NotApproved">
+        <di:waypoint x="1840" y="770" />
+        <di:waypoint x="1840" y="930" />
+        <di:waypoint x="755" y="930" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1822" y="840" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_015" bpmnElement="Flow_015">
+        <di:waypoint x="2130" y="480" />
+        <di:waypoint x="2235" y="480" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_016" bpmnElement="Flow_016">
+        <di:waypoint x="2310" y="520" />
+        <di:waypoint x="2310" y="862" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_001" bpmnElement="Flow_001">
+        <di:waypoint x="308" y="380" />
+        <di:waypoint x="425" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_002" bpmnElement="Flow_002">
+        <di:waypoint x="575" y="370" />
+        <di:waypoint x="675" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_003" bpmnElement="Flow_003">
+        <di:waypoint x="700" y="395" />
+        <di:waypoint x="700" y="500" />
+        <di:waypoint x="860" y="500" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="735" y="483" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_005" bpmnElement="Flow_005">
+        <di:waypoint x="725" y="370" />
+        <di:waypoint x="1095" y="370" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="738" y="353" width="45" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_007" bpmnElement="Flow_007">
+        <di:waypoint x="680" y="375" />
+        <di:waypoint x="680" y="730" />
+        <di:waypoint x="740" y="730" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="677" y="541" width="36" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_006" bpmnElement="Flow_006">
+        <di:waypoint x="1245" y="400" />
+        <di:waypoint x="1420" y="400" />
+        <di:waypoint x="1420" y="482" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_004" bpmnElement="Flow_004">
+        <di:waypoint x="1010" y="500" />
+        <di:waypoint x="1402" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_017" bpmnElement="Flow_017">
+        <di:waypoint x="775" y="950" />
+        <di:waypoint x="2110" y="950" />
+        <di:waypoint x="2110" y="785" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2033" y="856" width="73" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_018" bpmnElement="Flow_018">
+        <di:waypoint x="750" y="975" />
+        <di:waypoint x="750" y="1030" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="758" y="993" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_027" bpmnElement="Flow_027">
+        <di:waypoint x="2115" y="1080" />
+        <di:waypoint x="2220" y="1080" />
+        <di:waypoint x="2220" y="770" />
+        <di:waypoint x="2185" y="770" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2189" y="949" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_019" bpmnElement="Flow_019">
+        <di:waypoint x="825" y="1060" />
+        <di:waypoint x="1122" y="1060" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_028" bpmnElement="Flow_028">
+        <di:waypoint x="2090" y="1055" />
+        <di:waypoint x="2090" y="980" />
+        <di:waypoint x="1140" y="980" />
+        <di:waypoint x="1140" y="1042" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1160" y="993" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_020" bpmnElement="Flow_020">
+        <di:waypoint x="1158" y="1060" />
+        <di:waypoint x="1675" y="1060" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_023" bpmnElement="Flow_023">
+        <di:waypoint x="1705" y="1080" />
+        <di:waypoint x="1815" y="1080" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1729" y="1058" width="53" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_026" bpmnElement="Flow_026">
+        <di:waypoint x="1965" y="1080" />
+        <di:waypoint x="2065" y="1080" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_024" bpmnElement="Flow_024">
+        <di:waypoint x="1250" y="1260" />
+        <di:waypoint x="1250" y="1320" />
+        <di:waypoint x="2110" y="1320" />
+        <di:waypoint x="2110" y="1085" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_025" bpmnElement="Flow_025">
+        <di:waypoint x="1745" y="1240" />
+        <di:waypoint x="2090" y="1240" />
+        <di:waypoint x="2090" y="1105" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_021" bpmnElement="Flow_021">
+        <di:waypoint x="1655" y="1080" />
+        <di:waypoint x="1300" y="1080" />
+        <di:waypoint x="1300" y="1180" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1274" y="1119" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_022" bpmnElement="Flow_022">
+        <di:waypoint x="1680" y="1105" />
+        <di:waypoint x="1680" y="1200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1661" y="1167" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_P_Patient" bpmnElement="P_Patient" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="300" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_P_Correspondence" bpmnElement="P_Correspondence" isHorizontal="true">
+        <dc:Bounds x="2040" y="80" width="370" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_M_ClinicLetter" bpmnElement="M_ClinicLetter">
+        <di:waypoint x="2365" y="440" />
+        <di:waypoint x="2365" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2319" y="293" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_PatientEnquiry" bpmnElement="M_PatientEnquiry">
+        <di:waypoint x="290" y="160" />
+        <di:waypoint x="290" y="362" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="272" y="213" width="75" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_ClinicLetter_Result" bpmnElement="M_ClinicLetter_Result">
+        <di:waypoint x="2245" y="160" />
+        <di:waypoint x="2245" y="440" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2215" y="286" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

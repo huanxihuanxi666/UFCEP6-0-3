@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Defs_Appointment" targetNamespace="http://hospital.example/bpmn" exporter="Camunda Modeler" exporterVersion="5.51.0">
+  <bpmn:collaboration id="Collab_Appointment">
+    <bpmn:extensionElements />
+    <bpmn:participant id="P_Hospital" name="Hospital Patient Administration System" processRef="Process_Appointment" />
+    <bpmn:participant id="P_Scheduling" name="External Scheduling Service" />
+    <bpmn:participant id="P_Correspondence" name="External Correspondence Service" />
+    <bpmn:participant id="P_Patient" name="Patient" />
+    <bpmn:messageFlow id="M_Slot" name="Scheduling Request" sourceRef="T_SearchSlot" targetRef="P_Scheduling" />
+    <bpmn:messageFlow id="M_Slot_Response" name="Scheduling Availability Response" sourceRef="P_Scheduling" targetRef="T_SearchSlot" />
+    <bpmn:messageFlow id="M_ApptLetter" name="Appointment Letter Request" sourceRef="T_SendLetter" targetRef="P_Correspondence" />
+    <bpmn:messageFlow id="M_ApptLetter_Result" name="Correspondence Delivery Result" sourceRef="P_Correspondence" targetRef="T_SendLetter" />
+    <bpmn:messageFlow id="M_Phone_Contact" name="Telephone Contact" sourceRef="T_CallPatient" targetRef="P_Patient" />
+    <bpmn:messageFlow id="M_Phone_Response" name="Patient Contact Outcome" sourceRef="P_Patient" targetRef="T_CallPatient" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Appointment" name="Appointment &#38; Patient Communication" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_Appointment">
+      <bpmn:lane id="L_Outpatient" name="Outpatient Bookings Team">
+        <bpmn:flowNodeRef>S_Accepted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_BookingRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_SearchSlot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Slot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ConfirmAppt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_TwoWeeks</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_SendLetter</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L_Admin" name="Patient Communication / Pathway Coordination">
+        <bpmn:flowNodeRef>T_ContactOK</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_CallPatient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Confirmed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_CommDone</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_NoSlot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Reschedule</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_NoAnswer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_WrongNumber</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_UrgentCoord</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_CallOutcome</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Urgent</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:userTask id="T_ContactOK" name="Record Successful Contact">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1jhp0db</bpmn:incoming>
+      <bpmn:outgoing>Flow_019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_CallPatient" name="Telephone Patient">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_PatientContact" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_012</bpmn:incoming>
+      <bpmn:outgoing>Flow_014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="E_Confirmed" name="Confirmed Appointment Handover">
+      <bpmn:incoming>Flow_023</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="G_CommDone" name="Appointment Communication Complete">
+      <bpmn:incoming>Flow_013</bpmn:incoming>
+      <bpmn:incoming>Flow_019</bpmn:incoming>
+      <bpmn:incoming>Flow_020</bpmn:incoming>
+      <bpmn:incoming>Flow_021</bpmn:incoming>
+      <bpmn:outgoing>Flow_023</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_NoSlot" name="Record No Suitable Slot / Refer to Pathway Team / Update Search Request">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_AppointmentBooking" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_005</bpmn:incoming>
+      <bpmn:outgoing>Flow_006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_Reschedule" name="Record Reschedule Request">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_018</bpmn:incoming>
+      <bpmn:outgoing>Flow_022</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_NoAnswer" name="Record No Answer">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_016</bpmn:incoming>
+      <bpmn:outgoing>Flow_020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_WrongNumber" name="Record Wrong Number">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_017</bpmn:incoming>
+      <bpmn:outgoing>Flow_021</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:startEvent id="S_Accepted" name="Accepted Referral Received">
+      <bpmn:outgoing>Flow_001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="T_BookingRequest" name="Receive Booking Request">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_AppointmentBooking" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_001</bpmn:incoming>
+      <bpmn:outgoing>Flow_002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="T_SearchSlot" name="Search External Scheduling Service">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="search-appointment-slot" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_009</bpmn:incoming>
+      <bpmn:incoming>Flow_008</bpmn:incoming>
+      <bpmn:incoming>Flow_002</bpmn:incoming>
+      <bpmn:incoming>Flow_022</bpmn:incoming>
+      <bpmn:outgoing>Flow_003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="G_Slot" name="Suitable Slot Available?" default="Flow_005">
+      <bpmn:incoming>Flow_003</bpmn:incoming>
+      <bpmn:outgoing>Flow_004</bpmn:outgoing>
+      <bpmn:outgoing>Flow_005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_ConfirmAppt" name="Confirm Appointment">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_004</bpmn:incoming>
+      <bpmn:outgoing>Flow_010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="G_TwoWeeks" name="Appointment Within Two Weeks?" default="Flow_013">
+      <bpmn:incoming>Flow_011</bpmn:incoming>
+      <bpmn:outgoing>Flow_013</bpmn:outgoing>
+      <bpmn:outgoing>Flow_012</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_UrgentCoord" name="Urgent Coordination / Escalation">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_007</bpmn:incoming>
+      <bpmn:outgoing>Flow_008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="G_CallOutcome" name="Telephone Outcome" default="Flow_016">
+      <bpmn:incoming>Flow_014</bpmn:incoming>
+      <bpmn:outgoing>Flow_016</bpmn:outgoing>
+      <bpmn:outgoing>Flow_017</bpmn:outgoing>
+      <bpmn:outgoing>Flow_018</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1jhp0db</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="G_Urgent" name="Urgent Referral?" default="Flow_009">
+      <bpmn:incoming>Flow_006</bpmn:incoming>
+      <bpmn:outgoing>Flow_007</bpmn:outgoing>
+      <bpmn:outgoing>Flow_009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_SendLetter" name="Send Appointment Letter">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="send-appointment-letter" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_010</bpmn:incoming>
+      <bpmn:outgoing>Flow_011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1jhp0db" name="Answered" sourceRef="G_CallOutcome" targetRef="T_ContactOK">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(contactOutcome, "") = "ANSWERED"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_019" sourceRef="T_ContactOK" targetRef="G_CommDone" />
+    <bpmn:sequenceFlow id="Flow_012" name="Yes - phone also required" sourceRef="G_TwoWeeks" targetRef="T_CallPatient">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(appointmentWithinTwoWeeks, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_014" sourceRef="T_CallPatient" targetRef="G_CallOutcome" />
+    <bpmn:sequenceFlow id="Flow_023" sourceRef="G_CommDone" targetRef="E_Confirmed" />
+    <bpmn:sequenceFlow id="Flow_020" sourceRef="T_NoAnswer" targetRef="G_CommDone" />
+    <bpmn:sequenceFlow id="Flow_021" sourceRef="T_WrongNumber" targetRef="G_CommDone" />
+    <bpmn:sequenceFlow id="Flow_013" name="No" sourceRef="G_TwoWeeks" targetRef="G_CommDone" />
+    <bpmn:sequenceFlow id="Flow_005" name="No" sourceRef="G_Slot" targetRef="T_NoSlot" />
+    <bpmn:sequenceFlow id="Flow_006" sourceRef="T_NoSlot" targetRef="G_Urgent" />
+    <bpmn:sequenceFlow id="Flow_018" name="Reschedule" sourceRef="G_CallOutcome" targetRef="T_Reschedule">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(contactOutcome, "") = "RESCHEDULE"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_022" sourceRef="T_Reschedule" targetRef="T_SearchSlot" />
+    <bpmn:sequenceFlow id="Flow_016" name="No answer" sourceRef="G_CallOutcome" targetRef="T_NoAnswer" />
+    <bpmn:sequenceFlow id="Flow_017" name="Wrong number" sourceRef="G_CallOutcome" targetRef="T_WrongNumber">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(contactOutcome, "") = "WRONG_NUMBER"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_001" sourceRef="S_Accepted" targetRef="T_BookingRequest" />
+    <bpmn:sequenceFlow id="Flow_002" sourceRef="T_BookingRequest" targetRef="T_SearchSlot" />
+    <bpmn:sequenceFlow id="Flow_008" sourceRef="T_UrgentCoord" targetRef="T_SearchSlot" />
+    <bpmn:sequenceFlow id="Flow_009" name="No / retry" sourceRef="G_Urgent" targetRef="T_SearchSlot" />
+    <bpmn:sequenceFlow id="Flow_003" sourceRef="T_SearchSlot" targetRef="G_Slot" />
+    <bpmn:sequenceFlow id="Flow_004" name="Yes" sourceRef="G_Slot" targetRef="T_ConfirmAppt">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(slotAvailable, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_010" sourceRef="T_ConfirmAppt" targetRef="T_SendLetter" />
+    <bpmn:sequenceFlow id="Flow_011" sourceRef="T_SendLetter" targetRef="G_TwoWeeks" />
+    <bpmn:sequenceFlow id="Flow_007" name="Yes" sourceRef="G_Urgent" targetRef="T_UrgentCoord">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(urgentReferral, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_Appointment">
+    <bpmndi:BPMNPlane id="Plane_Appointment" bpmnElement="Collab_Appointment">
+      <bpmndi:BPMNShape id="Shape_P_Hospital" bpmnElement="P_Hospital" isHorizontal="true">
+        <dc:Bounds x="155" y="340" width="2595" height="520" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Outpatient" bpmnElement="L_Outpatient" isHorizontal="true">
+        <dc:Bounds x="185" y="340" width="2565" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Admin" bpmnElement="L_Admin" isHorizontal="true">
+        <dc:Bounds x="185" y="520" width="2565" height="340" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ContactOK" bpmnElement="T_ContactOK">
+        <dc:Bounds x="2035" y="604" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_CallPatient" bpmnElement="T_CallPatient">
+        <dc:Bounds x="1545" y="620" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Confirmed" bpmnElement="E_Confirmed">
+        <dc:Bounds x="2652" y="632" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2639" y="668" width="62" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_CommDone" bpmnElement="G_CommDone" isMarkerVisible="true">
+        <dc:Bounds x="2535" y="625" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2411" y="660" width="77" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_NoSlot" bpmnElement="T_NoSlot">
+        <dc:Bounds x="955" y="570" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Reschedule" bpmnElement="T_Reschedule">
+        <dc:Bounds x="1785" y="750" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_NoAnswer" bpmnElement="T_NoAnswer">
+        <dc:Bounds x="2105" y="730" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_WrongNumber" bpmnElement="T_WrongNumber">
+        <dc:Bounds x="2275" y="540" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Accepted" bpmnElement="S_Accepted">
+        <dc:Bounds x="252" y="412" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="226" y="448" width="89" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_BookingRequest" bpmnElement="T_BookingRequest">
+        <dc:Bounds x="360" y="400" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SearchSlot" bpmnElement="T_SearchSlot">
+        <dc:Bounds x="580" y="410" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Slot" bpmnElement="G_Slot" isMarkerVisible="true">
+        <dc:Bounds x="815" y="395" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="809" y="358" width="62" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ConfirmAppt" bpmnElement="T_ConfirmAppt">
+        <dc:Bounds x="985" y="400" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_TwoWeeks" bpmnElement="G_TwoWeeks" isMarkerVisible="true">
+        <dc:Bounds x="1455" y="415" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1449" y="475" width="62" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_UrgentCoord" bpmnElement="T_UrgentCoord">
+        <dc:Bounds x="1345" y="585" width="150" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_CallOutcome" bpmnElement="G_CallOutcome" isMarkerVisible="true">
+        <dc:Bounds x="1805" y="625" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1777" y="586" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Urgent" bpmnElement="G_Urgent" isMarkerVisible="true">
+        <dc:Bounds x="1185" y="585" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1169" y="561" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SendLetter" bpmnElement="T_SendLetter">
+        <dc:Bounds x="1210" y="400" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_023" bpmnElement="Flow_023">
+        <di:waypoint x="2585" y="650" />
+        <di:waypoint x="2652" y="650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_019" bpmnElement="Flow_019">
+        <di:waypoint x="2185" y="650" />
+        <di:waypoint x="2535" y="650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_020" bpmnElement="Flow_020">
+        <di:waypoint x="2255" y="770" />
+        <di:waypoint x="2560" y="770" />
+        <di:waypoint x="2560" y="675" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_021" bpmnElement="Flow_021">
+        <di:waypoint x="2425" y="580" />
+        <di:waypoint x="2560" y="580" />
+        <di:waypoint x="2560" y="625" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_001" bpmnElement="Flow_001">
+        <di:waypoint x="285" y="440" />
+        <di:waypoint x="360" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_022" bpmnElement="Flow_022">
+        <di:waypoint x="1785" y="790" />
+        <di:waypoint x="600" y="790" />
+        <di:waypoint x="600" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_002" bpmnElement="Flow_002">
+        <di:waypoint x="510" y="450" />
+        <di:waypoint x="580" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_005" bpmnElement="Flow_005">
+        <di:waypoint x="840" y="445" />
+        <di:waypoint x="840" y="610" />
+        <di:waypoint x="955" y="610" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="848" y="517" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_003" bpmnElement="Flow_003">
+        <di:waypoint x="730" y="420" />
+        <di:waypoint x="815" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_004" bpmnElement="Flow_004">
+        <di:waypoint x="865" y="420" />
+        <di:waypoint x="985" y="420" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="887" y="403" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_012" bpmnElement="Flow_012">
+        <di:waypoint x="1505" y="440" />
+        <di:waypoint x="1570" y="440" />
+        <di:waypoint x="1570" y="620" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1497" y="530" width="86" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_013" bpmnElement="Flow_013">
+        <di:waypoint x="1480" y="415" />
+        <di:waypoint x="1480" y="380" />
+        <di:waypoint x="2570" y="380" />
+        <di:waypoint x="2570" y="635" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2578" y="496" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_011" bpmnElement="Flow_011">
+        <di:waypoint x="1360" y="440" />
+        <di:waypoint x="1455" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_010" bpmnElement="Flow_010">
+        <di:waypoint x="1135" y="440" />
+        <di:waypoint x="1210" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_008" bpmnElement="Flow_008">
+        <di:waypoint x="1420" y="665" />
+        <di:waypoint x="1420" y="740" />
+        <di:waypoint x="640" y="740" />
+        <di:waypoint x="640" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jhp0db_di" bpmnElement="Flow_1jhp0db">
+        <di:waypoint x="1854" y="651" />
+        <di:waypoint x="2035" y="651" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1920" y="626" width="49" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_018" bpmnElement="Flow_018">
+        <di:waypoint x="1830" y="675" />
+        <di:waypoint x="1830" y="750" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1796" y="711" width="59" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_017" bpmnElement="Flow_017">
+        <di:waypoint x="1830" y="625" />
+        <di:waypoint x="1830" y="550" />
+        <di:waypoint x="2270" y="550" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1897" y="576" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_016" bpmnElement="Flow_016">
+        <di:waypoint x="1849" y="656" />
+        <di:waypoint x="1940" y="720" />
+        <di:waypoint x="2105" y="754" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1884" y="677" width="53" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_014" bpmnElement="Flow_014">
+        <di:waypoint x="1695" y="650" />
+        <di:waypoint x="1805" y="650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_009" bpmnElement="Flow_009">
+        <di:waypoint x="1210" y="635" />
+        <di:waypoint x="1210" y="690" />
+        <di:waypoint x="690" y="690" />
+        <di:waypoint x="690" y="490" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="927" y="665" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_007" bpmnElement="Flow_007">
+        <di:waypoint x="1235" y="610" />
+        <di:waypoint x="1345" y="610" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1259" y="593" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_006" bpmnElement="Flow_006">
+        <di:waypoint x="1105" y="610" />
+        <di:waypoint x="1185" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_P_Scheduling" bpmnElement="P_Scheduling" isHorizontal="true">
+        <dc:Bounds x="280" y="150" width="760" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_P_Correspondence" bpmnElement="P_Correspondence" isHorizontal="true">
+        <dc:Bounds x="1120" y="80" width="320" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_P_Patient" bpmnElement="P_Patient" isHorizontal="true">
+        <dc:Bounds x="1510" y="80" width="760" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_M_Slot" bpmnElement="M_Slot">
+        <di:waypoint x="655" y="410" />
+        <di:waypoint x="655" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="617" y="307" width="55" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_Slot_Response" bpmnElement="M_Slot_Response">
+        <di:waypoint x="700" y="230" />
+        <di:waypoint x="700" y="410" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="702" y="270" width="55" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_ApptLetter" bpmnElement="M_ApptLetter">
+        <di:waypoint x="1240" y="400" />
+        <di:waypoint x="1240" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1158" y="231" width="73" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_ApptLetter_Result" bpmnElement="M_ApptLetter_Result">
+        <di:waypoint x="1320" y="160" />
+        <di:waypoint x="1320" y="400" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1319" y="245" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_Phone_Contact" bpmnElement="M_Phone_Contact">
+        <di:waypoint x="1620" y="620" />
+        <di:waypoint x="1620" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1564" y="231" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_Phone_Response" bpmnElement="M_Phone_Response">
+        <di:waypoint x="1680" y="160" />
+        <di:waypoint x="1680" y="620" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1672" y="246" width="76" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

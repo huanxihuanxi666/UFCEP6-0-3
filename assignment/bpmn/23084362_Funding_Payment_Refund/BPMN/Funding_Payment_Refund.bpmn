@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Defs_Finance" targetNamespace="http://hospital.example/bpmn" exporter="Camunda Modeler" exporterVersion="5.41.0">
+  <bpmn:collaboration id="Collab_Finance">
+    <bpmn:participant id="P_Hospital" name="Hospital Patient Administration System" processRef="Process_Finance" />
+    <bpmn:participant id="P_Payment" name="External Payment Service Provider" />
+    <bpmn:messageFlow id="M_Payment" name="Secure Payment Request" sourceRef="T_PaymentRequest" targetRef="P_Payment" />
+    <bpmn:messageFlow id="M_Refund" name="Refund Request" sourceRef="T_Refund" targetRef="P_Payment" />
+    <bpmn:messageFlow id="M_Payment_Response" name="Payment Status / Transaction Result" sourceRef="P_Payment" targetRef="T_PaymentRequest" />
+    <bpmn:messageFlow id="M_Refund_Response" name="Refund Processing Result" sourceRef="P_Payment" targetRef="T_Refund" />
+  </bpmn:collaboration>
+  <bpmn:message id="Message_RefundRequest" name="Refund Request" />
+  <bpmn:process id="Process_Finance" name="Funding / Payment / Refund" isExecutable="true">
+    <bpmn:extensionElements />
+    <bpmn:laneSet id="LaneSet_Finance">
+      <bpmn:lane id="L_ClinicalOverride" name="Authorised Clinical Override">
+        <bpmn:flowNodeRef>G_UrgentPay</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Override</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L_Finance" name="Finance Team">
+        <bpmn:flowNodeRef>T_FundingDetails</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Funding</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Funding</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_HospitalFunding</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_InsurerFunding</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_PaymentRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Clear</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Clear</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_InsurerApproved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_PaymentOK</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_FundingPending</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_PaymentPending</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_PaymentRetry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RefundReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Refund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Payment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Refund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_RefundNotApproved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E_Refund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RefundResult</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Refund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Investigate</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:userTask id="T_FundingDetails" name="Record Funding / Payment Details">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_FundingPayment" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_001</bpmn:incoming>
+      <bpmn:outgoing>Flow_002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="G_Funding" name="Funding Type">
+      <bpmn:incoming>Flow_002</bpmn:incoming>
+      <bpmn:outgoing>Flow_003</bpmn:outgoing>
+      <bpmn:outgoing>Flow_005</bpmn:outgoing>
+      <bpmn:outgoing>Flow_007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:startEvent id="S_Funding" name="Funding / Payment Request Received">
+      <bpmn:outgoing>Flow_001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="T_HospitalFunding" name="Record Hospital Funding / Exemption">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_003</bpmn:incoming>
+      <bpmn:outgoing>Flow_004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_InsurerFunding" name="Record Insurer Approval / Limits">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_InsurerApproval" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_005</bpmn:incoming>
+      <bpmn:outgoing>Flow_Insurer_To_Approval</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="T_PaymentRequest" name="Send Secure Payment Request">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="process-payment" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_007</bpmn:incoming>
+      <bpmn:incoming>Flow_012</bpmn:incoming>
+      <bpmn:outgoing>Flow_008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="G_Clear" name="Funding / Payment Ready">
+      <bpmn:incoming>Flow_004</bpmn:incoming>
+      <bpmn:incoming>Flow_010</bpmn:incoming>
+      <bpmn:incoming>Flow_016</bpmn:incoming>
+      <bpmn:incoming>Flow_Insurer_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_018</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="E_Clear" name="Financial Clearance Handover">
+      <bpmn:incoming>Flow_018</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="G_UrgentPay" name="Urgent Treatment Despite Unconfirmed Payment?">
+      <bpmn:incoming>Flow_014</bpmn:incoming>
+      <bpmn:outgoing>Flow_017</bpmn:outgoing>
+      <bpmn:outgoing>Flow_015</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="G_InsurerApproved" name="Insurer / Funding Approved?">
+      <bpmn:incoming>Flow_Insurer_To_Approval</bpmn:incoming>
+      <bpmn:outgoing>Flow_Insurer_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Insurer_Pending</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_PaymentOK" name="Record Successful Payment">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_009</bpmn:incoming>
+      <bpmn:outgoing>Flow_010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="E_FundingPending" name="Funding Approval Pending">
+      <bpmn:incoming>Flow_Insurer_Pending</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="E_PaymentPending" name="Payment Investigation Pending / Finance Follow-up">
+      <bpmn:incoming>Flow_017</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="T_Override" name="Record Clinical Override + Refer to Finance">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_015</bpmn:incoming>
+      <bpmn:outgoing>Flow_016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_PaymentRetry" name="Notify Declined / Cancelled / Incomplete; Capture New Payment Attempt">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_FundingPayment" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_011</bpmn:incoming>
+      <bpmn:outgoing>Flow_012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_RefundReview" name="Review Refund Authority / Amount">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="Form_RefundReview" />
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_019</bpmn:incoming>
+      <bpmn:outgoing>Flow_020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="G_Refund" name="Refund Approved?">
+      <bpmn:incoming>Flow_020</bpmn:incoming>
+      <bpmn:outgoing>Flow_024</bpmn:outgoing>
+      <bpmn:outgoing>Flow_RefundApproved</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_001" sourceRef="S_Funding" targetRef="T_FundingDetails" />
+    <bpmn:sequenceFlow id="Flow_002" sourceRef="T_FundingDetails" targetRef="G_Funding" />
+    <bpmn:sequenceFlow id="Flow_003" name="Hospital / Exemption" sourceRef="G_Funding" targetRef="T_HospitalFunding">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(fundingType, "") = "HOSPITAL" or get or else(fundingType, "") = "EXEMPTION"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_005" name="Insurer" sourceRef="G_Funding" targetRef="T_InsurerFunding">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(fundingType, "") = "INSURER"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_007" name="Patient" sourceRef="G_Funding" targetRef="T_PaymentRequest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(fundingType, "") = "PATIENT"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_013" name="Investigate" sourceRef="G_Payment" targetRef="T_Investigate">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(paymentStatus, "") = "CONFIRMATION_LOST" or get or else(paymentStatus, "") = "DUPLICATE_RISK"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_014" sourceRef="T_Investigate" targetRef="G_UrgentPay" />
+    <bpmn:sequenceFlow id="Flow_004" sourceRef="T_HospitalFunding" targetRef="G_Clear" />
+    <bpmn:sequenceFlow id="Flow_008" sourceRef="T_PaymentRequest" targetRef="G_Payment" />
+    <bpmn:sequenceFlow id="Flow_009" name="Successful" sourceRef="G_Payment" targetRef="T_PaymentOK">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(paymentStatus, "") = "SUCCESSFUL"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_011" name="Retry" sourceRef="G_Payment" targetRef="T_PaymentRetry">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(paymentStatus, "") = "DECLINED" or get or else(paymentStatus, "") = "CANCELLED" or get or else(paymentStatus, "") = "INCOMPLETE"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Insurer_To_Approval" sourceRef="T_InsurerFunding" targetRef="G_InsurerApproved" />
+    <bpmn:sequenceFlow id="Flow_012" sourceRef="T_PaymentRetry" targetRef="T_PaymentRequest" />
+    <bpmn:sequenceFlow id="Flow_010" sourceRef="T_PaymentOK" targetRef="G_Clear" />
+    <bpmn:sequenceFlow id="Flow_016" sourceRef="T_Override" targetRef="G_Clear" />
+    <bpmn:sequenceFlow id="Flow_Insurer_Approved" name="Approved" sourceRef="G_InsurerApproved" targetRef="G_Clear">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(fundingApproved, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_018" sourceRef="G_Clear" targetRef="E_Clear" />
+    <bpmn:sequenceFlow id="Flow_017" name="No - do not recharge" sourceRef="G_UrgentPay" targetRef="E_PaymentPending">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(urgentTreatmentOverride, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_015" name="Yes" sourceRef="G_UrgentPay" targetRef="T_Override">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(urgentTreatmentOverride, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Insurer_Pending" name="Not Approved / Pending" sourceRef="G_InsurerApproved" targetRef="E_FundingPending">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(fundingApproved, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_019" sourceRef="S_Refund" targetRef="T_RefundReview" />
+    <bpmn:sequenceFlow id="Flow_075uvib" sourceRef="T_Refund" targetRef="T_RefundResult" />
+    <bpmn:sequenceFlow id="Flow_1qeu12t" sourceRef="T_RefundResult" targetRef="E_Refund" />
+    <bpmn:sequenceFlow id="Flow_024" name="Not approved or not required" sourceRef="G_Refund" targetRef="E_RefundNotApproved">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= not(get or else(refundRequired, false)) or not(get or else(refundApproved, false))</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_RefundApproved" name="Approved refund" sourceRef="G_Refund" targetRef="T_Refund">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= get or else(refundRequired, false) and get or else(refundApproved, false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_020" sourceRef="T_RefundReview" targetRef="G_Refund" />
+    <bpmn:exclusiveGateway id="G_Payment" name="Payment Status">
+      <bpmn:incoming>Flow_008</bpmn:incoming>
+      <bpmn:outgoing>Flow_013</bpmn:outgoing>
+      <bpmn:outgoing>Flow_009</bpmn:outgoing>
+      <bpmn:outgoing>Flow_011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:startEvent id="S_Refund" name="Refund Request Received">
+      <bpmn:outgoing>Flow_019</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_RefundStart" messageRef="Message_RefundRequest" />
+    </bpmn:startEvent>
+    <bpmn:endEvent id="E_RefundNotApproved" name="Refund Not Approved or Not Required">
+      <bpmn:incoming>Flow_024</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="E_Refund" name="Refund Process Complete">
+      <bpmn:incoming>Flow_1qeu12t</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="T_RefundResult" name="Record Refund Result">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_075uvib</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qeu12t</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="T_Refund" name="Send Approved Refund Request">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="process-refund" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_RefundApproved</bpmn:incoming>
+      <bpmn:outgoing>Flow_075uvib</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="T_Investigate" name="Investigate Confirmation Loss / Duplicate Risk">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_013</bpmn:incoming>
+      <bpmn:outgoing>Flow_014</bpmn:outgoing>
+    </bpmn:userTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_Finance">
+    <bpmndi:BPMNPlane id="Plane_Finance" bpmnElement="Collab_Finance">
+      <bpmndi:BPMNShape id="Shape_P_Hospital" bpmnElement="P_Hospital" isHorizontal="true">
+        <dc:Bounds x="160" y="290" width="2148" height="790" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_Finance" bpmnElement="L_Finance" isHorizontal="true">
+        <dc:Bounds x="190" y="290" width="2118" height="510" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_L_ClinicalOverride" bpmnElement="L_ClinicalOverride" isHorizontal="true">
+        <dc:Bounds x="190" y="800" width="2118" height="280" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_FundingDetails" bpmnElement="T_FundingDetails">
+        <dc:Bounds x="365" y="430" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Funding" bpmnElement="G_Funding" isMarkerVisible="true">
+        <dc:Bounds x="580" y="455" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="516" y="463" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Funding" bpmnElement="S_Funding">
+        <dc:Bounds x="262" y="452" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="246" y="390" width="88" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_HospitalFunding" bpmnElement="T_HospitalFunding">
+        <dc:Bounds x="715" y="380" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_InsurerFunding" bpmnElement="T_InsurerFunding">
+        <dc:Bounds x="1075" y="430" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_PaymentRequest" bpmnElement="T_PaymentRequest">
+        <dc:Bounds x="845" y="590" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Clear" bpmnElement="G_Clear" isMarkerVisible="true">
+        <dc:Bounds x="2095" y="505" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1940" y="486" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Clear" bpmnElement="E_Clear">
+        <dc:Bounds x="2252" y="632" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2194" y="680" width="51" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_UrgentPay" bpmnElement="G_UrgentPay" isMarkerVisible="true">
+        <dc:Bounds x="1805" y="875" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1707.5" y="873" width="87" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_InsurerApproved" bpmnElement="G_InsurerApproved" isMarkerVisible="true">
+        <dc:Bounds x="1290" y="445" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1273" y="495" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_PaymentOK" bpmnElement="T_PaymentOK">
+        <dc:Bounds x="1615" y="410" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_FundingPending" bpmnElement="E_FundingPending">
+        <dc:Bounds x="1132" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1106" y="335" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_PaymentPending" bpmnElement="E_PaymentPending">
+        <dc:Bounds x="1892" y="680" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1925" y="681" width="89" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Override" bpmnElement="T_Override">
+        <dc:Bounds x="2045" y="960" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_PaymentRetry" bpmnElement="T_PaymentRetry">
+        <dc:Bounds x="1335" y="680" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RefundReview" bpmnElement="T_RefundReview">
+        <dc:Bounds x="445" y="680" width="150" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Refund" bpmnElement="G_Refund" isMarkerVisible="true">
+        <dc:Bounds x="315" y="695" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="313" y="657.5" width="53" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_G_Payment" bpmnElement="G_Payment" isMarkerVisible="true">
+        <dc:Bounds x="1635" y="585" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1695" y="603" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Refund" bpmnElement="S_Refund">
+        <dc:Bounds x="502" y="542" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="479" y="504.5" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_RefundNotApproved" bpmnElement="E_RefundNotApproved">
+        <dc:Bounds x="262" y="592" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="259" y="550" width="81" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_E_Refund" bpmnElement="E_Refund">
+        <dc:Bounds x="1202" y="712" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1180" y="758" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_RefundResult" bpmnElement="T_RefundResult">
+        <dc:Bounds x="985" y="690" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Refund" bpmnElement="T_Refund">
+        <dc:Bounds x="715" y="690" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Investigate" bpmnElement="T_Investigate">
+        <dc:Bounds x="1815" y="580" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_001" bpmnElement="Flow_001">
+        <di:waypoint x="298" y="470" />
+        <di:waypoint x="365" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_002" bpmnElement="Flow_002">
+        <di:waypoint x="515" y="480" />
+        <di:waypoint x="580" y="480" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_003" bpmnElement="Flow_003">
+        <di:waypoint x="605" y="455" />
+        <di:waypoint x="605" y="420" />
+        <di:waypoint x="715" y="420" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="623" y="422" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_005" bpmnElement="Flow_005">
+        <di:waypoint x="630" y="480" />
+        <di:waypoint x="1075" y="480" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="809" y="458" width="35" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_007" bpmnElement="Flow_007">
+        <di:waypoint x="605" y="505" />
+        <di:waypoint x="605" y="520" />
+        <di:waypoint x="870" y="520" />
+        <di:waypoint x="870" y="590" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="610" y="503" width="35" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_013" bpmnElement="Flow_013">
+        <di:waypoint x="1680" y="605" />
+        <di:waypoint x="1680" y="560" />
+        <di:waypoint x="1890" y="560" />
+        <di:waypoint x="1890" y="580" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1729" y="543" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_014" bpmnElement="Flow_014">
+        <di:waypoint x="1830" y="660" />
+        <di:waypoint x="1830" y="875" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_004" bpmnElement="Flow_004">
+        <di:waypoint x="790" y="380" />
+        <di:waypoint x="790" y="320" />
+        <di:waypoint x="2190" y="320" />
+        <di:waypoint x="2190" y="530" />
+        <di:waypoint x="2145" y="530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_008" bpmnElement="Flow_008">
+        <di:waypoint x="995" y="610" />
+        <di:waypoint x="1635" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_009" bpmnElement="Flow_009">
+        <di:waypoint x="1660" y="585" />
+        <di:waypoint x="1660" y="490" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1613" y="516" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_011" bpmnElement="Flow_011">
+        <di:waypoint x="1660" y="635" />
+        <di:waypoint x="1660" y="720" />
+        <di:waypoint x="1485" y="720" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1509.0000000000002" y="689" width="27" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Insurer_To_Approval" bpmnElement="Flow_Insurer_To_Approval">
+        <di:waypoint x="1225" y="470" />
+        <di:waypoint x="1290" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_012" bpmnElement="Flow_012">
+        <di:waypoint x="1400" y="680" />
+        <di:waypoint x="1400" y="640" />
+        <di:waypoint x="995" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_010" bpmnElement="Flow_010">
+        <di:waypoint x="1765" y="440" />
+        <di:waypoint x="2020" y="440" />
+        <di:waypoint x="2020" y="530" />
+        <di:waypoint x="2095" y="530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_016" bpmnElement="Flow_016">
+        <di:waypoint x="2120" y="960" />
+        <di:waypoint x="2120" y="555" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Insurer_Approved" bpmnElement="Flow_Insurer_Approved">
+        <di:waypoint x="1340" y="470" />
+        <di:waypoint x="1340" y="390" />
+        <di:waypoint x="2120" y="390" />
+        <di:waypoint x="2120" y="505" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1476" y="373" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_018" bpmnElement="Flow_018">
+        <di:waypoint x="2134" y="541" />
+        <di:waypoint x="2252" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_017" bpmnElement="Flow_017">
+        <di:waypoint x="1855" y="900" />
+        <di:waypoint x="1910" y="900" />
+        <di:waypoint x="1910" y="716" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1868" y="856" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_015" bpmnElement="Flow_015">
+        <di:waypoint x="1830" y="925" />
+        <di:waypoint x="1830" y="1000" />
+        <di:waypoint x="2045" y="1000" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1878" y="983" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Insurer_Pending" bpmnElement="Flow_Insurer_Pending">
+        <di:waypoint x="1315" y="445" />
+        <di:waypoint x="1315" y="390" />
+        <di:waypoint x="1168" y="390" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1213" y="391" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_019" bpmnElement="Flow_019">
+        <di:waypoint x="520" y="578" />
+        <di:waypoint x="520" y="680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_075uvib_di" bpmnElement="Flow_075uvib">
+        <di:waypoint x="865" y="730" />
+        <di:waypoint x="985" y="730" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qeu12t_di" bpmnElement="Flow_1qeu12t">
+        <di:waypoint x="1135" y="730" />
+        <di:waypoint x="1202" y="730" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_024" bpmnElement="Flow_024">
+        <di:waypoint x="315" y="720" />
+        <di:waypoint x="280" y="720" />
+        <di:waypoint x="280" y="628" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="199" y="671" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RefundApproved_di" bpmnElement="Flow_RefundApproved">
+        <di:waypoint x="340" y="745" />
+        <di:waypoint x="340" y="790" />
+        <di:waypoint x="790" y="790" />
+        <di:waypoint x="790" y="770" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="609" y="773" width="81" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_020" bpmnElement="Flow_020">
+        <di:waypoint x="445" y="720" />
+        <di:waypoint x="365" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_P_Payment" bpmnElement="P_Payment" isHorizontal="true">
+        <dc:Bounds x="350" y="80" width="760" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_M_Payment" bpmnElement="M_Payment">
+        <di:waypoint x="980" y="590" />
+        <di:waypoint x="980" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="979" y="216" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_Refund" bpmnElement="M_Refund">
+        <di:waypoint x="810" y="690" />
+        <di:waypoint x="810" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="790" y="199" width="81" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_Payment_Response" bpmnElement="M_Payment_Response">
+        <di:waypoint x="920" y="160" />
+        <di:waypoint x="920" y="590" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="858" y="188" width="84" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_Refund_Response" bpmnElement="M_Refund_Response">
+        <di:waypoint x="750" y="160" />
+        <di:waypoint x="750" y="690" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="699" y="591" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
