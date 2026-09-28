@@ -32,7 +32,7 @@
     </bpmn:startEvent>
     <bpmn:callActivity id="Call_Referral" name="Referral &#38; Consultant Review">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="Process_Referral" propagateAllChildVariables="true" bindingType="deployment" />
+        <zeebe:calledElement processId="Process_Referral" propagateAllChildVariables="true" />
       </bpmn:extensionElements>
       <bpmn:incoming>F_001</bpmn:incoming>
       <bpmn:outgoing>F_002</bpmn:outgoing>
@@ -63,14 +63,14 @@
     <bpmn:sequenceFlow id="F_011" sourceRef="Call_Communication" targetRef="End_Master" />
     <bpmn:callActivity id="Call_Communication" name="Enquiry / Clinic Letter / Pathway Monitoring">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="Process_EnquiryLetter" propagateAllChildVariables="true" bindingType="deployment" />
+        <zeebe:calledElement processId="Process_EnquiryLetter" propagateAllChildVariables="true" />
       </bpmn:extensionElements>
       <bpmn:incoming>F_Ready</bpmn:incoming>
       <bpmn:outgoing>F_011</bpmn:outgoing>
     </bpmn:callActivity>
     <bpmn:callActivity id="Call_Appointment" name="Appointment &#38; Patient Communication">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="Process_Appointment" propagateAllChildVariables="true" bindingType="deployment" />
+        <zeebe:calledElement processId="Process_Appointment" propagateAllChildVariables="true" />
       </bpmn:extensionElements>
       <bpmn:incoming>F_ReferralAccepted</bpmn:incoming>
       <bpmn:outgoing>F_004</bpmn:outgoing>
@@ -81,7 +81,7 @@
     </bpmn:exclusiveGateway>
     <bpmn:callActivity id="Call_Finance" name="Funding / Payment / Refund">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="Process_Finance" propagateAllChildVariables="true" bindingType="deployment" />
+        <zeebe:calledElement processId="Process_Finance" propagateAllChildVariables="true" />
       </bpmn:extensionElements>
       <bpmn:incoming>F_006</bpmn:incoming>
       <bpmn:outgoing>F_008</bpmn:outgoing>
@@ -96,7 +96,7 @@
     </bpmn:exclusiveGateway>
     <bpmn:callActivity id="Call_Treatment" name="Treatment &#38; Chemotherapy">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="Process_Treatment" propagateAllChildVariables="true" bindingType="deployment" />
+        <zeebe:calledElement processId="Process_Treatment" propagateAllChildVariables="true" />
       </bpmn:extensionElements>
       <bpmn:incoming>F_007</bpmn:incoming>
       <bpmn:outgoing>F_009</bpmn:outgoing>

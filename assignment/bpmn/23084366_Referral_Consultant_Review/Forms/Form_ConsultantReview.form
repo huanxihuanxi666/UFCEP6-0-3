@@ -11,9 +11,6 @@
     },
     {
       "label": "Referral decision",
-      "type": "select",
-      "id": "Field_referralDecision",
-      "key": "referralDecision",
       "values": [
         {
           "label": "Accept",
@@ -32,6 +29,9 @@
           "value": "REDIRECT"
         }
       ],
+      "type": "select",
+      "id": "Field_referralDecision",
+      "key": "referralDecision",
       "validate": {
         "required": true
       }
@@ -67,10 +67,10 @@
   "type": "default",
   "id": "Form_ConsultantReview",
   "executionPlatform": "Camunda Cloud",
-  "executionPlatformVersion": "8.5.0",
+  "executionPlatformVersion": "8.10.0",
   "exporter": {
     "name": "Camunda Modeler",
-    "version": "5.x"
+    "version": "5.51.0"
   },
-  "schemaVersion": 16
+  "schemaVersion": 19
 }
