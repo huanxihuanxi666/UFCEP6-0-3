@@ -1,0 +1,8 @@
+{
+  "components": [
+    {"label":"Patient ID","type":"textfield","id":"Field_pi_patient","key":"patientId","validate":{"required":true}},
+    {"label":"Investigation outcome","type":"select","id":"Field_pi_outcome","key":"paymentInvestigationOutcome","values":[{"label":"Await provider confirmation","value":"AWAIT_CONFIRMATION"},{"label":"Duplicate risk confirmed","value":"DUPLICATE_RISK"},{"label":"No charge found","value":"NO_CHARGE_FOUND"}],"validate":{"required":true}},
+    {"label":"Investigation notes","type":"textarea","id":"Field_pi_notes","key":"paymentInvestigationNotes","validate":{"required":true}}
+  ],
+  "type":"default","id":"Form_PaymentInvestigation","executionPlatform":"Camunda Cloud","executionPlatformVersion":"8.10.0","exporter":{"name":"Camunda Modeler","version":"5.51.0"},"schemaVersion":19
+}

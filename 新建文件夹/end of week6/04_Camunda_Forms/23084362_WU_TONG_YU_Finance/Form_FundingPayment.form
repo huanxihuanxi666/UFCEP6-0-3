@@ -1,0 +1,119 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Funding type",
+      "values": [
+        {
+          "label": "Hospital funded",
+          "value": "HOSPITAL"
+        },
+        {
+          "label": "Authorised exemption",
+          "value": "EXEMPTION"
+        },
+        {
+          "label": "Insurer / funding organisation",
+          "value": "INSURER"
+        },
+        {
+          "label": "Patient payment",
+          "value": "PATIENT"
+        }
+      ],
+      "type": "select",
+      "id": "Field_fundingType",
+      "key": "fundingType",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Funding organisation",
+      "type": "textfield",
+      "id": "Field_fundingOrganisation",
+      "key": "fundingOrganisation",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Authorisation reference",
+      "type": "textfield",
+      "id": "Field_fundingAuthorisationReference",
+      "key": "fundingAuthorisationReference",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Approved amount",
+      "type": "textfield",
+      "id": "Field_approvedAmount",
+      "key": "approvedAmount",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Payment scenario for simulated provider",
+      "values": [
+        {
+          "label": "Successful",
+          "value": "SUCCESSFUL"
+        },
+        {
+          "label": "Declined",
+          "value": "DECLINED"
+        },
+        {
+          "label": "Cancelled",
+          "value": "CANCELLED"
+        },
+        {
+          "label": "Incomplete",
+          "value": "INCOMPLETE"
+        },
+        {
+          "label": "Confirmation lost",
+          "value": "CONFIRMATION_LOST"
+        },
+        {
+          "label": "Duplicate risk",
+          "value": "DUPLICATE_RISK"
+        }
+      ],
+      "type": "select",
+      "id": "Field_paymentScenario",
+      "key": "paymentScenario",
+      "validate": {
+        "required": false
+      },
+      "defaultValue": "SUCCESSFUL"
+    },
+    {
+      "label": "Urgent treatment override authorised",
+      "type": "checkbox",
+      "id": "Field_urgentTreatmentOverride",
+      "key": "urgentTreatmentOverride",
+      "defaultValue": false
+    }
+  ],
+  "type": "default",
+  "id": "Form_FundingPayment",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}

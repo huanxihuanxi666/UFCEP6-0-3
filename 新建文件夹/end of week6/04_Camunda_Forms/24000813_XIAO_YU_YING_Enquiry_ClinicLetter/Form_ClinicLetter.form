@@ -1,0 +1,75 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_0bojmuy"
+      }
+    },
+    {
+      "label": "Consultation / diagnosis / clinical findings",
+      "type": "textarea",
+      "id": "Field_clinicLetterClinicalContent",
+      "key": "clinicLetterClinicalContent",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_0zg5bcr"
+      }
+    },
+    {
+      "label": "Treatment decisions and follow-up",
+      "type": "textarea",
+      "id": "Field_clinicLetterFollowUp",
+      "key": "clinicLetterFollowUp",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_1ktho53"
+      }
+    },
+    {
+      "label": "Ready for distribution within 7 days",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_1626pri",
+        "columns": null
+      },
+      "id": "Field_1bevqeh",
+      "key": "clinicLetterWithin7Days",
+      "defaultValue": true,
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Intended recipients",
+      "type": "textfield",
+      "id": "Field_clinicLetterRecipients",
+      "key": "clinicLetterRecipients",
+      "validate": {
+        "required": true
+      },
+      "layout": {
+        "row": "Row_1626pri"
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_ClinicLetter",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}

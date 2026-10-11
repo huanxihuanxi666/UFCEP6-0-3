@@ -1,0 +1,64 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_ref_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Refund required",
+      "type": "checkbox",
+      "id": "Field_ref_required",
+      "key": "refundRequired",
+      "defaultValue": false
+    },
+    {
+      "label": "Refund approved by authorised Finance staff",
+      "type": "checkbox",
+      "id": "Field_ref_approved",
+      "key": "refundApproved",
+      "defaultValue": false
+    },
+    {
+      "label": "Refund type",
+      "values": [
+        {
+          "label": "Full",
+          "value": "FULL"
+        },
+        {
+          "label": "Partial",
+          "value": "PARTIAL"
+        }
+      ],
+      "type": "select",
+      "id": "Field_ref_type",
+      "key": "refundType",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Refund amount",
+      "type": "textfield",
+      "id": "Field_ref_amount",
+      "key": "refundAmount",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_RefundReview",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}

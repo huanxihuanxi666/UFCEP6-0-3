@@ -1,0 +1,56 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_ins_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Funding organisation",
+      "type": "textfield",
+      "id": "Field_ins_org",
+      "key": "fundingOrganisation",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Funding approved",
+      "type": "checkbox",
+      "id": "Field_fundingApproved",
+      "key": "fundingApproved",
+      "defaultValue": true
+    },
+    {
+      "label": "Authorisation reference",
+      "type": "textfield",
+      "id": "Field_ins_ref",
+      "key": "fundingAuthorisationReference",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Approved amount",
+      "type": "textfield",
+      "id": "Field_ins_amount",
+      "key": "approvedAmount",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_InsurerApproval",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}

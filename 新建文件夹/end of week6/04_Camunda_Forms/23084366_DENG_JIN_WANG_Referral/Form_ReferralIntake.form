@@ -1,0 +1,71 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Referral ID",
+      "type": "textfield",
+      "id": "Field_referralId",
+      "key": "referralId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Referring organisation",
+      "type": "textfield",
+      "id": "Field_referringOrganisation",
+      "key": "referringOrganisation",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Supporting information complete",
+      "type": "checkbox",
+      "id": "Field_informationComplete",
+      "key": "informationComplete",
+      "defaultValue": true
+    },
+    {
+      "label": "Simulated referral reference valid",
+      "description": "Input for the external intake validation worker",
+      "type": "checkbox",
+      "id": "Field_requestedReferralReferenceValid",
+      "key": "requestedReferralReferenceValid",
+      "defaultValue": true
+    },
+    {
+      "label": "Urgent referral",
+      "type": "checkbox",
+      "id": "Field_urgentReferral",
+      "key": "urgentReferral",
+      "defaultValue": false
+    },
+    {
+      "label": "Missing information / notes",
+      "type": "textarea",
+      "id": "Field_referralNotes",
+      "key": "referralNotes",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_ReferralIntake",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}
