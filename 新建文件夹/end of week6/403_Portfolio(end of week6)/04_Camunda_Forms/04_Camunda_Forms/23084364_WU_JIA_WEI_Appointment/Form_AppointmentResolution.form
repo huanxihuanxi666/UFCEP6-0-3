@@ -1,0 +1,70 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true,
+        "minLength": 3,
+        "maxLength": 64
+      }
+    },
+    {
+      "label": "Appointment / contact outcome",
+      "type": "select",
+      "id": "Field_contactOutcome",
+      "key": "contactOutcome",
+      "values": [
+        {
+          "label": "Confirmed",
+          "value": "CONFIRMED"
+        },
+        {
+          "label": "No suitable slot",
+          "value": "NO_SLOT"
+        },
+        {
+          "label": "No answer",
+          "value": "NO_ANSWER"
+        },
+        {
+          "label": "Wrong number",
+          "value": "WRONG_NUMBER"
+        },
+        {
+          "label": "Reschedule requested",
+          "value": "RESCHEDULE"
+        },
+        {
+          "label": "Urgent escalation completed",
+          "value": "URGENT_ESCALATION"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Outcome note and next action",
+      "type": "textarea",
+      "id": "Field_contactNote",
+      "key": "contactNote",
+      "validate": {
+        "required": true,
+        "minLength": 5,
+        "maxLength": 1000
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_AppointmentResolution",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}

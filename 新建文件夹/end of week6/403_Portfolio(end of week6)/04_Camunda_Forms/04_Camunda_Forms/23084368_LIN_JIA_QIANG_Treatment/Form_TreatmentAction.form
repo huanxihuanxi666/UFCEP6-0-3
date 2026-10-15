@@ -1,0 +1,70 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true,
+        "minLength": 3,
+        "maxLength": 64
+      }
+    },
+    {
+      "label": "Treatment action",
+      "type": "select",
+      "id": "Field_treatmentAction",
+      "key": "treatmentAction",
+      "values": [
+        {
+          "label": "Consent recorded",
+          "value": "CONSENT"
+        },
+        {
+          "label": "Booking confirmed",
+          "value": "BOOKED"
+        },
+        {
+          "label": "Delay authorised",
+          "value": "DELAY"
+        },
+        {
+          "label": "Pending / resource retry",
+          "value": "PENDING"
+        },
+        {
+          "label": "Financial clearance confirmed",
+          "value": "FUNDING_CLEAR"
+        },
+        {
+          "label": "Unauthorised request returned",
+          "value": "RETURNED"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Clinical / operational reason",
+      "type": "textarea",
+      "id": "Field_treatmentActionReason",
+      "key": "treatmentActionReason",
+      "validate": {
+        "required": true,
+        "minLength": 5,
+        "maxLength": 1000
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_TreatmentAction",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}
