@@ -1,0 +1,53 @@
+{
+  "info": {
+    "_postman_id": "e63a92b1-a49a-4e47-b9b7-6992e67d5b28",
+    "name": "Hospital Patient API",
+    "description": "Import this collection into Postman. Create a mock server from this collection, then set mockBaseUrl in the supplied environment to the generated mock-server base URL.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Next Patient",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{mockBaseUrl}}/patients/next",
+          "host": ["{{mockBaseUrl}}"],
+          "path": ["patients", "next"]
+        },
+        "description": "The request used by the separate Camunda REST Connector BPMN model."
+      },
+      "response": [
+        {
+          "name": "Patient Returned",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://example.com/patients/next",
+              "protocol": "https",
+              "host": ["example", "com"],
+              "path": ["patients", "next"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {"key": "Content-Type", "value": "application/json"}
+          ],
+          "cookie": [],
+          "body": "{\n  \"patientId\": \"P1001\",\n  \"patientName\": \"John Smith\",\n  \"referralType\": \"Cardiology\",\n  \"referralStatus\": \"NEW\"\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "mockBaseUrl",
+      "value": "https://YOUR-MOCK-ID.mock.pstmn.io",
+      "type": "string"
+    }
+  ]
+}
