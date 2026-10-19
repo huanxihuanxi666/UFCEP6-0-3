@@ -1,0 +1,10 @@
+{
+  "components": [
+    {"label":"External data issue","type":"select","id":"Field_Resolve_IssueType","key":"externalDataIssueType","values":[{"label":"Patient ID is missing","value":"missing_patient_id"},{"label":"Referral type is missing or invalid","value":"invalid_referral_type"},{"label":"Returned patient data was not confirmed","value":"data_not_confirmed"},{"label":"External API is unavailable","value":"api_unavailable"}],"validate":{"required":true}},
+    {"label":"Resolution note","type":"textarea","id":"Field_Resolve_Note","key":"externalDataResolutionNote","validate":{"required":true,"minLength":5,"maxLength":1000}},
+    {"label":"Retry the Postman external API?","type":"select","id":"Field_Resolve_Retry","key":"retryExternalApi","values":[{"label":"Yes - retry GET /patients/next","value":"true"},{"label":"No - finish as external data unresolved","value":"false"}],"validate":{"required":true}}
+  ],
+  "type":"default",
+  "schemaVersion":16,
+  "id":"Form_ResolveExternalData"
+}

@@ -1,0 +1,65 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_hf_patient",
+      "key": "patientId",
+      "validate": {
+        "required": true,
+        "minLength": 3,
+        "maxLength": 64
+      }
+    },
+    {
+      "label": "Funding route",
+      "type": "select",
+      "id": "Field_hf_route",
+      "key": "fundingType",
+      "values": [
+        {
+          "label": "Hospital funded",
+          "value": "HOSPITAL"
+        },
+        {
+          "label": "Exemption",
+          "value": "EXEMPTION"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Funding or exemption reference",
+      "type": "textfield",
+      "id": "Field_hf_reference",
+      "key": "hospitalFundingReference",
+      "validate": {
+        "required": true,
+        "minLength": 3,
+        "maxLength": 120
+      }
+    },
+    {
+      "label": "Authorised by",
+      "type": "textfield",
+      "id": "Field_hf_authoriser",
+      "key": "hospitalFundingAuthoriser",
+      "validate": {
+        "required": true,
+        "minLength": 3,
+        "maxLength": 120
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_HospitalFunding",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.10.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.51.0"
+  },
+  "schemaVersion": 19
+}
