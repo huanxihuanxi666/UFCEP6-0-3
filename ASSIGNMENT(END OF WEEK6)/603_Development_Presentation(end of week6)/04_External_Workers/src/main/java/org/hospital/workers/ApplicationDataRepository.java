@@ -22,7 +22,10 @@ import java.util.Map;
  */
 public final class ApplicationDataRepository {
 
-    private static final String DEFAULT_URL = "jdbc:h2:file:./data/hospital-applications;AUTO_SERVER=TRUE";
+    // A file-backed URL keeps records after the worker is stopped and started again.
+    // No AUTO_SERVER mode is used: each worker job opens and closes its connection,
+    // so the database file is released cleanly when the application closes.
+    private static final String DEFAULT_URL = "jdbc:h2:file:./data/hospital-applications";
     private static final ApplicationDataRepository DEFAULT = new ApplicationDataRepository(DEFAULT_URL);
 
     private final String jdbcUrl;

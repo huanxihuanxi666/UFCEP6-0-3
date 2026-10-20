@@ -41,6 +41,42 @@
           "body": "{\n  \"patientId\": \"P1001\",\n  \"patientName\": \"John Smith\",\n  \"referralType\": \"Cardiology\",\n  \"referralStatus\": \"NEW\"\n}"
         }
       ]
+    },
+    {
+      "name": "Get Demonstration Patient Records",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{mockBaseUrl}}/patients/demo-records",
+          "host": ["{{mockBaseUrl}}"],
+          "path": ["patients", "demo-records"]
+        },
+        "description": "Presentation-only endpoint. It returns two patient records. It is separate from /patients/next because the Camunda REST Connector expects one patient object there."
+      },
+      "response": [
+        {
+          "name": "Two Demonstration Patients Returned",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://example.com/patients/demo-records",
+              "protocol": "https",
+              "host": ["example", "com"],
+              "path": ["patients", "demo-records"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {"key": "Content-Type", "value": "application/json"}
+          ],
+          "cookie": [],
+          "body": "{\n  \"recordCount\": 2,\n  \"patients\": [\n    {\n      \"patientId\": \"P1001\",\n      \"patientName\": \"John Smith\",\n      \"referralType\": \"Cardiology\",\n      \"referralStatus\": \"NEW\",\n      \"priority\": \"URGENT\",\n      \"contactNumber\": \"07123456789\",\n      \"requestedAppointmentDate\": \"2026-10-24\"\n    },\n    {\n      \"patientId\": \"P1002\",\n      \"patientName\": \"Aisha Khan\",\n      \"referralType\": \"Oncology\",\n      \"referralStatus\": \"PENDING_REVIEW\",\n      \"priority\": \"ROUTINE\",\n      \"contactNumber\": \"07987654321\",\n      \"requestedAppointmentDate\": \"2026-10-29\"\n    }\n  ]\n}"
+        }
+      ]
     }
   ],
   "variable": [

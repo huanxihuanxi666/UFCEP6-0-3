@@ -1,0 +1,18 @@
+This project uses H2, not SQLite.
+
+Do not open hospital-applications.mv.db with SQLiteStudio.
+SQLiteStudio only understands SQLite files and will report: file is not a database.
+
+Correct way to view the data:
+1. Double-click Open_H2_Database_Console.cmd.
+2. In the H2 browser login page use:
+   Driver Class: org.h2.Driver
+   JDBC URL: jdbc:h2:file:D:/Camunda-Workspace/models/ASSIGNMENT(END OF WEEK6)/603_Development_Presentation(end of week6)/04_External_Workers/data/hospital-applications
+   User Name: sa
+   Password: leave blank
+3. Run this read-only query:
+   SELECT patient_id, data_key, data_value, source, updated_at
+   FROM application_data
+   ORDER BY patient_id, data_key;
+
+For a quick read-only terminal view, double-click View_H2_Persisted_Data.cmd.
