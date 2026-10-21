@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_Strategic_V1_Balanced" targetNamespace="http://hospital.example/strategy" exporter="Camunda Modeler" exporterVersion="5.41.0">
+  <bpmn:process id="Strategic_Process_V1_Balanced" name="Release 1 Strategic Hospital Pathway — Presentation View" isExecutable="false">
+    <bpmn:documentation>Presentation-ready strategic view derived only from the five existing operational BPMN child models and Hospital_Master_Process. Each call activity is a high-level summary of its matching child model; gateways show the two critical V1 decisions.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Balanced">
+      <bpmn:lane id="Lane_Letter" name="Clinic Letter / Enquiry / Monitoring — Xiao Yu Ying">
+        <bpmn:flowNodeRef>Letter</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndComplete</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Treatment" name="Treatment &#38; Chemotherapy — Lin Jia Qiang">
+        <bpmn:flowNodeRef>Treatment</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Finance" name="Funding / Payment / Refund — Wu Tong Yu">
+        <bpmn:flowNodeRef>Finance</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>FinanceFollowUp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Cleared</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndPending</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Appointment" name="Appointment &#38; Patient Communication — Wu Jia Wei">
+        <bpmn:flowNodeRef>Appointment</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Referral" name="Referral &#38; Consultant Review — Deng Jin Wang">
+        <bpmn:flowNodeRef>CaptureReferral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ConsultantReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndRejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Accepted</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Patient pathway started">
+      <bpmn:outgoing>F01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:callActivity id="CaptureReferral" name="Referral capture and validation">
+      <bpmn:documentation>Source: Referral_Consultant_Review.bpmn — record referral, check supporting information and validate external reference.</bpmn:documentation>
+      <bpmn:incoming>F01</bpmn:incoming>
+      <bpmn:outgoing>F02</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:callActivity id="ConsultantReview" name="Consultant review and decision">
+      <bpmn:documentation>Source: Referral_Consultant_Review.bpmn — consultant review leading to acceptance, rejection or redirect.</bpmn:documentation>
+      <bpmn:incoming>F02</bpmn:incoming>
+      <bpmn:outgoing>F03</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="Accepted" name="Referral accepted?">
+      <bpmn:incoming>F03</bpmn:incoming>
+      <bpmn:outgoing>F04</bpmn:outgoing>
+      <bpmn:outgoing>F05</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndRejected" name="Closed / redirected">
+      <bpmn:incoming>F05</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:callActivity id="Appointment" name="Appointment and patient communication">
+      <bpmn:documentation>Source: Appointment_Patient_Communication.bpmn — booking request, slot search, urgent escalation and patient communication.</bpmn:documentation>
+      <bpmn:incoming>F04</bpmn:incoming>
+      <bpmn:outgoing>F06</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:callActivity id="Finance" name="Funding, payment and refund">
+      <bpmn:documentation>Source: Funding_Payment_Refund.bpmn — funding route, insurer/exemption, payment/refund and clearance.</bpmn:documentation>
+      <bpmn:incoming>F06</bpmn:incoming>
+      <bpmn:outgoing>F07</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="Cleared" name="Financially cleared?">
+      <bpmn:incoming>F07</bpmn:incoming>
+      <bpmn:outgoing>F08</bpmn:outgoing>
+      <bpmn:outgoing>F09</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:callActivity id="FinanceFollowUp" name="Financial follow-up">
+      <bpmn:documentation>Source: Funding_Payment_Refund.bpmn — funding approval or payment investigation remains pending.</bpmn:documentation>
+      <bpmn:incoming>F09</bpmn:incoming>
+      <bpmn:outgoing>F10</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:endEvent id="EndPending" name="Pending follow-up">
+      <bpmn:incoming>F10</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:callActivity id="Treatment" name="Treatment and chemotherapy cycle">
+      <bpmn:documentation>Source: Treatment_Chemotherapy.bpmn — assessment, consent, resource check, chemotherapy cycle and clinical review.</bpmn:documentation>
+      <bpmn:incoming>F08</bpmn:incoming>
+      <bpmn:outgoing>F11</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:callActivity id="Letter" name="Enquiry, clinic letter and monitoring">
+      <bpmn:documentation>Source: Enquiry_ClinicLetter_Monitoring.bpmn — clinic letter, patient enquiry routing and delay monitoring.</bpmn:documentation>
+      <bpmn:incoming>F11</bpmn:incoming>
+      <bpmn:outgoing>F12</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:endEvent id="EndComplete" name="Patient pathway complete">
+      <bpmn:incoming>F12</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F01" sourceRef="Start" targetRef="CaptureReferral" />
+    <bpmn:sequenceFlow id="F02" sourceRef="CaptureReferral" targetRef="ConsultantReview" />
+    <bpmn:sequenceFlow id="F03" sourceRef="ConsultantReview" targetRef="Accepted" />
+    <bpmn:sequenceFlow id="F04" name="Yes" sourceRef="Accepted" targetRef="Appointment" />
+    <bpmn:sequenceFlow id="F05" name="No" sourceRef="Accepted" targetRef="EndRejected" />
+    <bpmn:sequenceFlow id="F06" name="Appointment and patient data" sourceRef="Appointment" targetRef="Finance" />
+    <bpmn:sequenceFlow id="F07" sourceRef="Finance" targetRef="Cleared" />
+    <bpmn:sequenceFlow id="F08" name="Yes" sourceRef="Cleared" targetRef="Treatment" />
+    <bpmn:sequenceFlow id="F09" name="Pending / no" sourceRef="Cleared" targetRef="FinanceFollowUp" />
+    <bpmn:sequenceFlow id="F10" sourceRef="FinanceFollowUp" targetRef="EndPending" />
+    <bpmn:sequenceFlow id="F11" name="Treatment outcome" sourceRef="Treatment" targetRef="Letter" />
+    <bpmn:sequenceFlow id="F12" name="Clinic letter and update" sourceRef="Letter" targetRef="EndComplete" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_Balanced">
+    <bpmndi:BPMNPlane id="Plane_Balanced" bpmnElement="Strategic_Process_V1_Balanced">
+      <bpmndi:BPMNShape id="Lane_Letter_di" bpmnElement="Lane_Letter" isHorizontal="false">
+        <dc:Bounds x="1365" y="40" width="315" height="610" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Treatment_di" bpmnElement="Lane_Treatment" isHorizontal="false">
+        <dc:Bounds x="1075" y="40" width="290" height="610" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Finance_di" bpmnElement="Lane_Finance" isHorizontal="false">
+        <dc:Bounds x="785" y="40" width="290" height="610" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Appointment_di" bpmnElement="Lane_Appointment" isHorizontal="false">
+        <dc:Bounds x="515" y="40" width="270" height="610" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Referral_di" bpmnElement="Lane_Referral" isHorizontal="false">
+        <dc:Bounds x="160" y="40" width="355" height="610" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CaptureReferral_di" bpmnElement="CaptureReferral" isMarkerVisible="true">
+        <dc:Bounds x="172" y="255" width="135" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_di" bpmnElement="Start" isMarkerVisible="true">
+        <dc:Bounds x="222" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="200" y="94.5" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndRejected_di" bpmnElement="EndRejected" isMarkerVisible="true">
+        <dc:Bounds x="402" y="442" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="395" y="478" width="50" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ConsultantReview_di" bpmnElement="ConsultantReview" isMarkerVisible="true">
+        <dc:Bounds x="362" y="105" width="115" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Accepted_di" bpmnElement="Accepted" isMarkerVisible="true">
+        <dc:Bounds x="395" y="265" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="333" y="276" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Appointment_di" bpmnElement="Appointment" isMarkerVisible="true">
+        <dc:Bounds x="565" y="255" width="170" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Finance_di" bpmnElement="Finance" isMarkerVisible="true">
+        <dc:Bounds x="845" y="255" width="170" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Cleared_di" bpmnElement="Cleared" isMarkerVisible="true">
+        <dc:Bounds x="905" y="365" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="841.5" y="376" width="53" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="FinanceFollowUp_di" bpmnElement="FinanceFollowUp" isMarkerVisible="true">
+        <dc:Bounds x="855" y="455" width="150" height="62" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndPending_di" bpmnElement="EndPending" isMarkerVisible="true">
+        <dc:Bounds x="912" y="572" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="886" y="620" width="88" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Treatment_di" bpmnElement="Treatment" isMarkerVisible="true">
+        <dc:Bounds x="1135" y="355" width="190" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Letter_di" bpmnElement="Letter" isMarkerVisible="true">
+        <dc:Bounds x="1445" y="355" width="210" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndComplete_di" bpmnElement="EndComplete" isMarkerVisible="true">
+        <dc:Bounds x="1532" y="232" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1510" y="194.5" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F01_di" bpmnElement="F01">
+        <di:waypoint x="240" y="168" />
+        <di:waypoint x="240" y="255" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F02_di" bpmnElement="F02">
+        <di:waypoint x="280" y="255" />
+        <di:waypoint x="280" y="140" />
+        <di:waypoint x="362" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F03_di" bpmnElement="F03">
+        <di:waypoint x="420" y="175" />
+        <di:waypoint x="420" y="265" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F04_di" bpmnElement="F04">
+        <di:waypoint x="445" y="290" />
+        <di:waypoint x="565" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="456" y="290" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F05_di" bpmnElement="F05">
+        <di:waypoint x="420" y="315" />
+        <di:waypoint x="420" y="442" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="428" y="367" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F06_di" bpmnElement="F06">
+        <di:waypoint x="735" y="290" />
+        <di:waypoint x="845" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="748" y="265" width="83" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F07_di" bpmnElement="F07">
+        <di:waypoint x="930" y="325" />
+        <di:waypoint x="930" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F08_di" bpmnElement="F08">
+        <di:waypoint x="955" y="390" />
+        <di:waypoint x="1135" y="390" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1095" y="389" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F09_di" bpmnElement="F09">
+        <di:waypoint x="930" y="415" />
+        <di:waypoint x="930" y="455" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="914" y="428" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F10_di" bpmnElement="F10">
+        <di:waypoint x="930" y="517" />
+        <di:waypoint x="930" y="572" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F11_di" bpmnElement="F11">
+        <di:waypoint x="1325" y="390" />
+        <di:waypoint x="1445" y="390" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1359" y="365" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F12_di" bpmnElement="F12">
+        <di:waypoint x="1550" y="355" />
+        <di:waypoint x="1550" y="268" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1500" y="296" width="77" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
